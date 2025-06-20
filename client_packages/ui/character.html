@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Character Creation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        cursor: default;
+        overflow: hidden;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        width: 500px;
+        backdrop-filter: blur(10px);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        color: #333;
+        font-size: 28px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+        background: #f8f9fa;
+        cursor: text;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: #fff;
+      }
+
+      .gender-section {
+        margin: 25px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 2px solid #e1e5e9;
+      }
+
+      .gender-section h3 {
+        margin-bottom: 15px;
+        color: #333;
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .gender-options {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+      }
+
+      .gender-option {
+        flex: 1;
+        padding: 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        font-weight: 600;
+      }
+
+      .gender-option:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+      }
+
+      .gender-option.selected {
+        border-color: #667eea;
+        background: #667eea;
+        color: white;
+      }
+
+      .gender-option .icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 15px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .message {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        display: none;
+        word-wrap: break-word;
+      }
+
+      .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        margin: 10px 0;
+      }
+
+      .loading::after {
+        content: "";
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Create Your Character</h1>
+        <p>Set your character's name and choose your gender</p>
+      </div>
+
+      <div id="message" class="message"></div>
+      <div id="loading" class="loading"></div>
+
+      <form onsubmit="handleCharacterCreation(event)">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            required
+            minlength="2"
+            maxlength="20"
+            placeholder="Enter your first name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            required
+            minlength="2"
+            maxlength="20"
+            placeholder="Enter your last name"
+          />
+        </div>
+
+        <div class="gender-section">
+          <h3>Choose Your Gender</h3>
+          <div class="gender-options">
+            <div
+              class="gender-option"
+              data-gender="male"
+              onclick="selectGender('male')"
+            >
+              <span class="icon">👨</span>
+              <div>Male</div>
+            </div>
+            <div
+              class="gender-option"
+              data-gender="female"
+              onclick="selectGender('female')"
+            >
+              <span class="icon">👩</span>
+              <div>Female</div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Character</button>
+      </form>
+    </div>
+
+    <script>
+      let selectedGender = "male";
+
+      function selectGender(gender) {
+        selectedGender = gender;
+
+        document.querySelectorAll(".gender-option").forEach((option) => {
+          option.classList.remove("selected");
+        });
+
+        document
+          .querySelector(`[data-gender="${gender}"]`)
+          .classList.add("selected");
+      }
+
+      function handleCharacterCreation(event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const firstName = formData.get("firstName").trim();
+        const lastName = formData.get("lastName").trim();
+
+        if (!firstName || !lastName) {
+          showMessage("error", "Please fill in both first and last name");
+          return;
+        }
+
+        if (firstName.length < 2 || lastName.length < 2) {
+          showMessage("error", "Names must be at least 2 characters long");
+          return;
+        }
+
+        if (firstName.length > 20 || lastName.length > 20) {
+          showMessage("error", "Names must be less than 20 characters");
+          return;
+        }
+
+        showLoading(true);
+        sendMessage("createCharacter", {
+          firstName,
+          lastName,
+          gender: selectedGender,
+        });
+      }
+
+      function sendMessage(type, data) {
+        try {
+          if (typeof mp !== "undefined" && mp.trigger) {
+            if (type === "createCharacter") {
+              mp.trigger(
+                "character:uiEvent",
+                type,
+                data.firstName,
+                data.lastName,
+                data.gender
+              );
+            } else {
+              mp.trigger("character:uiEvent", type, data);
+            }
+          } else {
+            window.parent.postMessage({ type: type, data: data }, "*");
+          }
+        } catch (error) {
+          console.error("Failed to send message:", error);
+        }
+      }
+
+      function showMessage(type, message) {
+        showLoading(false);
+
+        const messageEl = document.getElementById("message");
+        messageEl.textContent = message;
+        messageEl.className = `message ${type}`;
+        messageEl.style.display = "block";
+
+        setTimeout(() => {
+          hideMessage();
+        }, 5000);
+      }
+
+      function hideMessage() {
+        const messageEl = document.getElementById("message");
+        messageEl.style.display = "none";
+      }
+
+      function showLoading(show) {
+        const loadingEl = document.getElementById("loading");
+        loadingEl.style.display = show ? "block" : "none";
+      }
+
+      window.showMessage = showMessage;
+      window.hideMessage = hideMessage;
+      window.showLoading = showLoading;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set default gender selection
+        selectGender("male");
+        setTimeout(() => {
+          document.getElementById("firstName").focus();
+        }, 100);
+      });
+    </script>
+  </body>
+</html>

@@ -11,7 +11,7 @@ class AuthUI {
   }
 
   createBrowser() {
-    this.browser = mp.browsers.new("package://login.html");
+    this.browser = mp.browsers.new("package://ui/login.html");
     this.browser.active = false;
   }
 
@@ -188,6 +188,7 @@ class AuthEvents {
   constructor() {
     this.isAuthenticated = false;
     this.userData = null;
+    this.hasCharacter = false;
   }
 
   init() {
@@ -195,23 +196,16 @@ class AuthEvents {
   }
 
   setupEventHandlers() {
-    mp.events.add("auth:authenticated", this.onAuthenticated.bind(this));
     mp.events.add("auth:logout", this.onLogout.bind(this));
     mp.events.add("playerSpawn", this.onPlayerSpawn.bind(this));
     mp.keys.bind(0x1b, false, this.onEscapeKey.bind(this));
     mp.events.add("playerCommand", this.onPlayerCommand.bind(this));
   }
 
-  onAuthenticated(userData) {
-    this.isAuthenticated = true;
-    this.userData = userData;
-    this.enableGameFeatures();
-    mp.events.call("auth:playerAuthenticated", userData);
-  }
-
   onLogout() {
     this.isAuthenticated = false;
     this.userData = null;
+    this.hasCharacter = false;
     this.disableGameFeatures();
     mp.events.callRemote("auth:logout");
   }
@@ -227,6 +221,9 @@ class AuthEvents {
   onEscapeKey() {
     if (authUI.isVisible()) {
       authUI.hide();
+    }
+    if (characterCreationUI && characterCreationUI.isVisible()) {
+      characterCreationUI.hide();
     }
   }
 
@@ -260,6 +257,14 @@ class AuthEvents {
 
   getUserId() {
     return this.userData ? this.userData.id : null;
+  }
+
+  setHasCharacter(hasCharacter) {
+    this.hasCharacter = hasCharacter;
+  }
+
+  hasPlayerCharacter() {
+    return this.hasCharacter;
   }
 }
 

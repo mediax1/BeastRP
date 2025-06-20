@@ -1,4 +1,5 @@
-const DatabaseManager = require("./DatabaseManager");
+const DatabaseManager = require("./DatabaseManager.js");
+const CharacterManager = require("./CharacterManager.js");
 
 class AuthManager {
   constructor() {
@@ -8,6 +9,7 @@ class AuthManager {
 
   init() {
     this.setupEventHandlers();
+    CharacterManager.init();
     console.log("AuthManager initialized");
   }
 
@@ -17,6 +19,7 @@ class AuthManager {
     mp.events.add("auth:login", this.handleLogin.bind(this));
     mp.events.add("auth:signup", this.handleSignup.bind(this));
     mp.events.add("auth:logout", this.handleLogout.bind(this));
+    mp.events.add("character:create", this.handleCharacterCreation.bind(this));
   }
 
   onPlayerJoin(player) {
@@ -68,19 +71,36 @@ class AuthManager {
           player.setVariable("username", result.user.username);
           player.setVariable("sessionToken", sessionToken);
 
-          player.freezePosition = false;
-          player.spawn(new mp.Vector3(-1037.74, -2738.04, 20.17));
-
-          this.sendAuthResponse(
-            player,
-            true,
-            "Login successful! Welcome back!"
+          const character = await CharacterManager.getCharacterByUserId(
+            result.user.id
           );
 
-          player.outputChatBox(
-            "!{00FF00}Welcome back, " + result.user.username + "!"
-          );
-          player.outputChatBox("!{FFFFFF}Type /help for available commands");
+          if (!character) {
+            console.log(
+              `No character found for user ${result.user.username}, showing character creation UI`
+            );
+            this.sendAuthResponse(
+              player,
+              true,
+              "Login successful! Please create your character."
+            );
+            setTimeout(() => {
+              console.log(
+                `Triggering character creation UI for user ${result.user.username}`
+              );
+              this.showCharacterCreationUI(player);
+            }, 2000);
+          } else {
+            console.log(
+              `Character found for user ${result.user.username}, spawning with character`
+            );
+            this.spawnPlayerWithCharacter(player, character);
+            this.sendAuthResponse(
+              player,
+              true,
+              `Welcome back, ${character.firstName} ${character.lastName}!`
+            );
+          }
 
           console.log(`User ${username} logged in successfully`);
         } else {
@@ -149,6 +169,68 @@ class AuthManager {
     }
   }
 
+  async handleCharacterCreation(player, firstName, lastName, outfit) {
+    try {
+      console.log(
+        `Character creation attempt for user: ${player.getVariable("username")}`
+      );
+
+      if (!firstName || !lastName || !outfit) {
+        this.sendCharacterResponse(player, false, "All fields are required");
+        return;
+      }
+
+      if (firstName.length < 2 || lastName.length < 2) {
+        this.sendCharacterResponse(
+          player,
+          false,
+          "Names must be at least 2 characters"
+        );
+        return;
+      }
+
+      if (firstName.length > 20 || lastName.length > 20) {
+        this.sendCharacterResponse(
+          player,
+          false,
+          "Names must be less than 20 characters"
+        );
+        return;
+      }
+
+      const userId = player.getVariable("userId");
+      const result = await CharacterManager.createCharacter(
+        userId,
+        firstName,
+        lastName,
+        outfit
+      );
+
+      if (result.success) {
+        this.sendCharacterResponse(
+          player,
+          true,
+          `Character created successfully! Welcome to the server, ${firstName} ${lastName}!`
+        );
+
+        setTimeout(() => {
+          this.spawnPlayerWithCharacter(player, result.character);
+        }, 2000);
+
+        console.log(`Character created: ${firstName} ${lastName}`);
+      } else {
+        this.sendCharacterResponse(player, false, result.error);
+      }
+    } catch (error) {
+      console.error("Character creation error:", error);
+      this.sendCharacterResponse(
+        player,
+        false,
+        "An error occurred during character creation"
+      );
+    }
+  }
+
   async handleLogout(player) {
     try {
       const sessionToken = player.getVariable("sessionToken");
@@ -179,12 +261,65 @@ class AuthManager {
     player.call("auth:hideLoginUI");
   }
 
+  showCharacterCreationUI(player) {
+    player.call("character:showCreationUI");
+  }
+
+  hideCharacterCreationUI(player) {
+    player.call("character:hideCreationUI");
+  }
+
   sendAuthResponse(player, success, message) {
     player.call("auth:response", [success, message]);
 
-    if (success && message.includes("Login successful")) {
+    if (
+      success &&
+      message.includes("Login successful") &&
+      !message.includes("Please create your character")
+    ) {
       this.hideLoginUI(player);
     }
+  }
+
+  sendCharacterResponse(player, success, message) {
+    player.call("character:response", [success, message]);
+
+    if (success) {
+      this.hideCharacterCreationUI(player);
+    }
+  }
+
+  spawnPlayerWithCharacter(player, character) {
+    player.freezePosition = false;
+    player.spawn(
+      new mp.Vector3(
+        character.position.x,
+        character.position.y,
+        character.position.z
+      )
+    );
+
+    this.applyCharacterAppearance(player, character.appearance);
+
+    player.setVariable("characterId", character.id);
+    player.setVariable(
+      "characterName",
+      `${character.firstName} ${character.lastName}`
+    );
+  }
+
+  applyCharacterAppearance(player, appearance) {
+    player.setClothes(0, appearance.face, 0, 0);
+    player.setClothes(2, appearance.hair, 0, 0);
+    player.setClothes(3, appearance.torso, 0, 0);
+    player.setClothes(4, appearance.legs, 0, 0);
+    player.setClothes(5, appearance.hands, 0, 0);
+    player.setClothes(6, appearance.feet, 0, 0);
+    player.setClothes(7, appearance.accessories, 0, 0);
+    player.setClothes(8, appearance.undershirt, 0, 0);
+    player.setClothes(9, appearance.bodyArmor, 0, 0);
+    player.setClothes(10, appearance.decals, 0, 0);
+    player.setClothes(11, appearance.tops, 0, 0);
   }
 
   generateSessionToken() {

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "1",
+    "userId": "1",
+    "firstName": "lol",
+    "lastName": "LOLLLL",
+    "gender": "female",
+    "appearance": {
+      "face": 0,
+      "hair": 6,
+      "torso": 7,
+      "legs": 2,
+      "feet": 1,
+      "tops": 1,
+      "hands": 1,
+      "accessories": 0,
+      "undershirt": 1,
+      "bodyArmor": 1,
+      "decals": 3,
+      "gender": "female"
+    },
+    "createdAt": "2025-06-20T20:10:12.990Z",
+    "lastPlayed": "2025-06-20T20:10:12.990Z",
+    "level": 1,
+    "experience": 0,
+    "money": 1000,
+    "bank": 5000,
+    "health": 100,
+    "armor": 0,
+    "position": {
+      "x": -1037.74,
+      "y": -2738.04,
+      "z": 20.17
+    }
+  }
+]
