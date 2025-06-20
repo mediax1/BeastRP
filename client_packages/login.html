@@ -361,7 +361,7 @@
         const confirmPassword = formData.get("confirmPassword");
 
         if (!username || !email || !password || !confirmPassword) {
-          showMessage("error", "Please fill in all fields");
+          showMessage("error", "login.html Please fill in all fields");
           return;
         }
 
@@ -391,7 +391,20 @@
       function sendMessage(type, data) {
         try {
           if (typeof mp !== "undefined" && mp.trigger) {
-            mp.trigger("auth:uiEvent", type, data);
+            if (type === "signup") {
+              mp.trigger(
+                "auth:uiEvent",
+                type,
+                data.username,
+                data.email,
+                data.password,
+                data.confirmPassword
+              );
+            } else if (type === "login") {
+              mp.trigger("auth:uiEvent", type, data.username, data.password);
+            } else {
+              mp.trigger("auth:uiEvent", type, data);
+            }
           } else {
             window.parent.postMessage({ type: type, data: data }, "*");
           }

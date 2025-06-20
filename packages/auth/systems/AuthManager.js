@@ -7,48 +7,29 @@ class AuthManager {
   }
 
   init() {
-    console.log("Initializing Auth Manager...");
     this.setupEventHandlers();
-    console.log("Auth Manager initialized");
+    console.log("AuthManager initialized");
   }
 
   setupEventHandlers() {
-    // Handle player join - show login UI automatically
     mp.events.add("playerJoin", this.onPlayerJoin.bind(this));
-
-    // Handle player quit - cleanup session
     mp.events.add("playerQuit", this.onPlayerQuit.bind(this));
-
-    // Handle authentication events from client UI
     mp.events.add("auth:login", this.handleLogin.bind(this));
     mp.events.add("auth:signup", this.handleSignup.bind(this));
     mp.events.add("auth:logout", this.handleLogout.bind(this));
   }
 
   onPlayerJoin(player) {
-    console.log(
-      `Player ${player.name} joined - showing login UI automatically`
-    );
-
-    this.showLoginUI(player);
-
-    // Freeze player until they log in using correct RAGE:MP API
+    console.log(`Player ${player.name} joined, showing login UI`);
     player.freezePosition = true;
-    player.setVariable("authenticated", false);
-
-    player.outputChatBox(
-      "!{FFFF00}Welcome to RAGE:MP! Please login or create an account to continue."
-    );
+    player.spawn(new mp.Vector3(-1037.74, -2738.04, 20.17));
+    setTimeout(() => {
+      this.showLoginUI(player);
+    }, 1000);
   }
 
   onPlayerQuit(player) {
-    console.log(`Player ${player.name} quit - cleaning up session`);
-
-    const sessionToken = player.getVariable("sessionToken");
-    if (sessionToken) {
-      this.invalidateSession(sessionToken);
-    }
-
+    console.log(`Player ${player.name} left the server`);
     this.activeSessions.delete(player.id);
   }
 
@@ -87,7 +68,6 @@ class AuthManager {
           player.setVariable("username", result.user.username);
           player.setVariable("sessionToken", sessionToken);
 
-          // Unfreeze player and spawn them using correct API
           player.freezePosition = false;
           player.spawn(new mp.Vector3(-1037.74, -2738.04, 20.17));
 
@@ -192,20 +172,17 @@ class AuthManager {
   }
 
   showLoginUI(player) {
-    // Send CEF event to show login UI
     player.call("auth:showLoginUI");
   }
 
   hideLoginUI(player) {
-    // Send CEF event to hide login UI
     player.call("auth:hideLoginUI");
   }
 
   sendAuthResponse(player, success, message) {
-    // Send response to client
     player.call("auth:response", [success, message]);
 
-    if (success) {
+    if (success && message.includes("Login successful")) {
       this.hideLoginUI(player);
     }
   }
@@ -220,7 +197,6 @@ class AuthManager {
     return await DatabaseManager.invalidateSession(sessionToken);
   }
 
-  // Utility methods
   isPlayerAuthenticated(player) {
     return player.getVariable("authenticated") === true;
   }
@@ -237,7 +213,6 @@ class AuthManager {
     return this.activeSessions.size;
   }
 
-  // Validation methods
   validateUsername(username) {
     const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
     return usernameRegex.test(username);

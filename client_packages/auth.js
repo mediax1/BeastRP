@@ -39,7 +39,7 @@ class AuthUI {
       console.log("AuthUI: Setting cursor visible");
       mp.gui.cursor.visible = true;
       console.log("AuthUI: Cursor visible state:", mp.gui.cursor.visible);
-    }, 100); // 100ms delay
+    }, 100);
 
     mp.game.ui.displayRadar(false);
     mp.game.ui.displayHud(false);
@@ -66,13 +66,18 @@ class AuthUI {
     console.log("AuthUI: switchMode executed in browser with mode:", mode);
   }
 
-  handleUIEvent(type, data) {
+  handleUIEvent(type, data, ...additionalData) {
     switch (type) {
       case "login":
-        this.handleLogin(data);
+        this.handleLogin(data, additionalData[0]);
         break;
       case "signup":
-        this.handleSignup(data);
+        this.handleSignup(
+          data,
+          additionalData[0],
+          additionalData[1],
+          additionalData[2]
+        );
         break;
       case "switchMode":
         this.currentMode = data.mode;
@@ -84,8 +89,7 @@ class AuthUI {
     }
   }
 
-  handleLogin(data) {
-    const { username, password } = data;
+  handleLogin(username, password) {
     if (!username || !password) {
       this.showError("Please fill in all fields");
       return;
@@ -93,10 +97,11 @@ class AuthUI {
     mp.events.callRemote("auth:login", username, password);
   }
 
-  handleSignup(data) {
-    const { username, email, password, confirmPassword } = data;
+  handleSignup(username, email, password, confirmPassword) {
     if (!username || !email || !password || !confirmPassword) {
-      this.showError("Please fill in all fields");
+      this.showError(
+        `auth.js Please fill in all fields ${username} ${email} ${password} ${confirmPassword}`
+      );
       return;
     }
     if (password !== confirmPassword) {
@@ -132,9 +137,17 @@ class AuthUI {
   handleServerResponse(success, message) {
     if (success) {
       this.showSuccess(message);
-      setTimeout(() => {
-        this.hide();
-      }, 2000);
+
+      if (message.includes("Account created successfully")) {
+        setTimeout(() => {
+          this.switchMode("login");
+          this.showInfo("Please login with your new account");
+        }, 2000);
+      } else {
+        setTimeout(() => {
+          this.hide();
+        }, 2000);
+      }
     } else {
       this.showError(message);
     }
