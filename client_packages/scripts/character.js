@@ -23,19 +23,19 @@ class CharacterCreationUI {
     mp.events.add("character:showCreationUI", this.show.bind(this));
     mp.events.add("character:hideCreationUI", this.hide.bind(this));
     mp.events.add("character:response", this.handleServerResponse.bind(this));
-
-    console.log("CharacterCreationUI: Event handlers set up");
+    mp.events.add(
+      "character:setHeadBlendData",
+      this.handleHeadBlendData.bind(this)
+    );
   }
 
   show() {
     if (this.visible) return;
 
-    console.log("CharacterCreationUI: Showing character creation interface");
     this.visible = true;
     this.browser.active = true;
 
     setTimeout(() => {
-      console.log("CharacterCreationUI: Setting cursor visible");
       mp.gui.cursor.visible = true;
     }, 100);
 
@@ -48,7 +48,6 @@ class CharacterCreationUI {
   hide() {
     if (!this.visible) return;
 
-    console.log("CharacterCreationUI: Hiding character creation interface");
     this.visible = false;
     this.browser.active = false;
 
@@ -60,14 +59,6 @@ class CharacterCreationUI {
   }
 
   handleUIEvent(type, firstName, lastName, gender) {
-    console.log(
-      "CharacterCreationUI: Received UI event:",
-      type,
-      firstName,
-      lastName,
-      gender
-    );
-
     switch (type) {
       case "createCharacter":
         this.handleCharacterCreation(firstName, lastName, gender);
@@ -76,13 +67,6 @@ class CharacterCreationUI {
   }
 
   handleCharacterCreation(firstName, lastName, gender) {
-    console.log(
-      "CharacterCreationUI: Creating character with:",
-      firstName,
-      lastName,
-      gender
-    );
-
     if (!firstName || !lastName || !gender) {
       this.showError("Please fill in all fields and select your gender");
       return;
@@ -104,11 +88,45 @@ class CharacterCreationUI {
   handleServerResponse(success, message) {
     if (success) {
       this.showSuccess(message);
+      if (global.authEvents) {
+        global.authEvents.setAuthenticated(true);
+        global.authEvents.setHasCharacter(true);
+      }
       setTimeout(() => {
         this.hide();
       }, 2000);
     } else {
       this.showError(message);
+    }
+  }
+
+  handleHeadBlendData(
+    shapeFirstID,
+    shapeSecondID,
+    shapeThirdID,
+    skinFirstID,
+    skinSecondID,
+    skinThirdID,
+    shapeMix,
+    skinMix,
+    thirdMix,
+    isParent
+  ) {
+    try {
+      mp.players.local.setHeadBlendData(
+        shapeFirstID,
+        shapeSecondID,
+        shapeThirdID,
+        skinFirstID,
+        skinSecondID,
+        skinThirdID,
+        shapeMix,
+        skinMix,
+        thirdMix,
+        isParent
+      );
+    } catch (error) {
+      console.error("Error setting head blend data:", error);
     }
   }
 
@@ -136,3 +154,11 @@ class CharacterCreationUI {
 
 const characterCreationUI = new CharacterCreationUI();
 characterCreationUI.init();
+
+global.characterCreationUI = characterCreationUI;
+
+mp.events.add("playerModelChange", () => {
+  setTimeout(() => {
+    mp.events.callRemote("character:requestHeadBlendData");
+  }, 500);
+});

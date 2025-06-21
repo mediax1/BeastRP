@@ -169,13 +169,13 @@ class AuthManager {
     }
   }
 
-  async handleCharacterCreation(player, firstName, lastName, outfit) {
+  async handleCharacterCreation(player, firstName, lastName, gender) {
     try {
       console.log(
         `Character creation attempt for user: ${player.getVariable("username")}`
       );
 
-      if (!firstName || !lastName || !outfit) {
+      if (!firstName || !lastName || !gender) {
         this.sendCharacterResponse(player, false, "All fields are required");
         return;
       }
@@ -198,12 +198,21 @@ class AuthManager {
         return;
       }
 
+      if (gender !== "male" && gender !== "female") {
+        this.sendCharacterResponse(
+          player,
+          false,
+          "Gender must be either 'male' or 'female'"
+        );
+        return;
+      }
+
       const userId = player.getVariable("userId");
       const result = await CharacterManager.createCharacter(
         userId,
         firstName,
         lastName,
-        outfit
+        gender
       );
 
       if (result.success) {
@@ -217,7 +226,7 @@ class AuthManager {
           this.spawnPlayerWithCharacter(player, result.character);
         }, 2000);
 
-        console.log(`Character created: ${firstName} ${lastName}`);
+        console.log(`Character created: ${firstName} ${lastName} (${gender})`);
       } else {
         this.sendCharacterResponse(player, false, result.error);
       }
@@ -291,6 +300,13 @@ class AuthManager {
 
   spawnPlayerWithCharacter(player, character) {
     player.freezePosition = false;
+
+    const modelHash =
+      character.gender === "female"
+        ? mp.joaat("mp_f_freemode_01")
+        : mp.joaat("mp_m_freemode_01");
+
+    player.model = modelHash;
     player.spawn(
       new mp.Vector3(
         character.position.x,
@@ -299,7 +315,9 @@ class AuthManager {
       )
     );
 
-    this.applyCharacterAppearance(player, character.appearance);
+    setTimeout(() => {
+      this.applyCharacterAppearance(player, character.appearance);
+    }, 2000);
 
     player.setVariable("characterId", character.id);
     player.setVariable(
@@ -309,17 +327,71 @@ class AuthManager {
   }
 
   applyCharacterAppearance(player, appearance) {
-    player.setClothes(0, appearance.face, 0, 0);
-    player.setClothes(2, appearance.hair, 0, 0);
-    player.setClothes(3, appearance.torso, 0, 0);
-    player.setClothes(4, appearance.legs, 0, 0);
-    player.setClothes(5, appearance.hands, 0, 0);
-    player.setClothes(6, appearance.feet, 0, 0);
-    player.setClothes(7, appearance.accessories, 0, 0);
-    player.setClothes(8, appearance.undershirt, 0, 0);
-    player.setClothes(9, appearance.bodyArmor, 0, 0);
-    player.setClothes(10, appearance.decals, 0, 0);
-    player.setClothes(11, appearance.tops, 0, 0);
+    if (
+      player.model !==
+      (appearance.gender === "female"
+        ? mp.joaat("mp_f_freemode_01")
+        : mp.joaat("mp_m_freemode_01"))
+    ) {
+      player.model =
+        appearance.gender === "female"
+          ? mp.joaat("mp_f_freemode_01")
+          : mp.joaat("mp_m_freemode_01");
+    }
+
+    setTimeout(() => {
+      try {
+        if (appearance.headBlend) {
+          player.call("character:setHeadBlendData", [
+            appearance.headBlend.shapeFirstID || 0,
+            appearance.headBlend.shapeSecondID || 0,
+            appearance.headBlend.shapeThirdID || 0,
+            appearance.headBlend.skinFirstID || 0,
+            appearance.headBlend.skinSecondID || 0,
+            appearance.headBlend.skinThirdID || 0,
+            appearance.headBlend.shapeMix || 0.5,
+            appearance.headBlend.skinMix || 0.5,
+            appearance.headBlend.thirdMix || 0.0,
+            appearance.headBlend.isParent || false,
+          ]);
+        } else {
+          const defaultShape = appearance.gender === "female" ? 21 : 0;
+          const defaultSkin = appearance.gender === "female" ? 21 : 0;
+          player.call("character:setHeadBlendData", [
+            defaultShape,
+            defaultShape,
+            0,
+            defaultSkin,
+            defaultSkin,
+            0,
+            0.5,
+            0.5,
+            0.0,
+            false,
+          ]);
+        }
+      } catch (error) {
+        console.error("Error applying head blend data:", error);
+      }
+    }, 300);
+
+    setTimeout(() => {
+      try {
+        player.setClothes(1, appearance.masks || 0, 0, 0);
+        player.setClothes(2, appearance.hair || 0, 0, 0);
+        player.setClothes(3, appearance.torso || 0, 0, 0);
+        player.setClothes(4, appearance.legs || 0, 0, 0);
+        player.setClothes(5, appearance.bags || 0, 0, 0);
+        player.setClothes(6, appearance.feet || 0, 0, 0);
+        player.setClothes(7, appearance.accessories || 0, 0, 0);
+        player.setClothes(8, appearance.undershirt || 0, 0, 0);
+        player.setClothes(9, appearance.bodyArmor || 0, 0, 0);
+        player.setClothes(10, appearance.decals || 0, 0, 0);
+        player.setClothes(11, appearance.tops || 0, 0, 0);
+      } catch (error) {
+        console.error("Error applying clothing:", error);
+      }
+    }, 800);
   }
 
   generateSessionToken() {

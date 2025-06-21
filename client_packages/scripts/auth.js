@@ -143,6 +143,11 @@ class AuthUI {
           this.switchMode("login");
           this.showInfo("Please login with your new account");
         }, 2000);
+      } else if (message.includes("Login successful")) {
+        global.authEvents.setAuthenticated(true);
+        setTimeout(() => {
+          this.hide();
+        }, 2000);
       } else {
         setTimeout(() => {
           this.hide();
@@ -222,8 +227,8 @@ class AuthEvents {
     if (authUI.isVisible()) {
       authUI.hide();
     }
-    if (characterCreationUI && characterCreationUI.isVisible()) {
-      characterCreationUI.hide();
+    if (global.characterCreationUI && global.characterCreationUI.isVisible()) {
+      global.characterCreationUI.hide();
     }
   }
 
@@ -266,6 +271,10 @@ class AuthEvents {
   hasPlayerCharacter() {
     return this.hasCharacter;
   }
+
+  setAuthenticated(authenticated) {
+    this.isAuthenticated = authenticated;
+  }
 }
 
 const authUI = new AuthUI();
@@ -273,3 +282,5 @@ const authEvents = new AuthEvents();
 
 authUI.init();
 authEvents.init();
+
+global.authEvents = authEvents;

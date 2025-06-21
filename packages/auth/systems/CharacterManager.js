@@ -78,44 +78,52 @@ class CharacterManager {
   }
 
   generateRandomAppearance(userId, gender) {
-    // Use userId as seed to ensure consistency for each player
-    const seed = this.hashCode(userId.toString());
-    const random = this.seededRandom(seed);
+    const random = this.seededRandom(this.hashCode(userId.toString()));
 
-    if (gender === "female") {
-      const appearance = {
-        face: Math.floor(random() * 5),
-        hair: Math.floor(random() * 10),
-        torso: Math.floor(random() * 15),
-        legs: Math.floor(random() * 10),
-        feet: Math.floor(random() * 8),
-        tops: Math.floor(random() * 12),
-        hands: Math.floor(random() * 5),
-        accessories: Math.floor(random() * 5),
-        undershirt: Math.floor(random() * 5),
-        bodyArmor: Math.floor(random() * 3),
-        decals: Math.floor(random() * 5),
-        gender: "female",
-      };
-      return appearance;
-    } else {
-      // Male appearance
-      const appearance = {
-        face: Math.floor(random() * 5),
-        hair: Math.floor(random() * 10),
-        torso: Math.floor(random() * 15),
-        legs: Math.floor(random() * 10),
-        feet: Math.floor(random() * 8),
-        tops: Math.floor(random() * 12),
-        hands: Math.floor(random() * 5),
-        accessories: Math.floor(random() * 5),
-        undershirt: Math.floor(random() * 5),
-        bodyArmor: Math.floor(random() * 3),
-        decals: Math.floor(random() * 5),
-        gender: "male",
-      };
-      return appearance;
-    }
+    const isFemale = gender === "female";
+    const headBlendRange = isFemale
+      ? { min: 21, max: 45 }
+      : { min: 0, max: 20 };
+    const hairRange = isFemale ? { min: 1, max: 20 } : { min: 1, max: 40 };
+
+    const baseAppearance = {
+      masks: 0,
+      hair:
+        Math.floor(random() * (hairRange.max - hairRange.min + 1)) +
+        hairRange.min,
+      torso: 0,
+      legs: 0,
+      bags: 0,
+      feet: 0,
+      accessories: 0,
+      undershirt: 0,
+      bodyArmor: 0,
+      decals: 0,
+      tops: 0,
+      gender: gender,
+      headBlend: {
+        shapeFirstID:
+          Math.floor(random() * (headBlendRange.max - headBlendRange.min + 1)) +
+          headBlendRange.min,
+        shapeSecondID:
+          Math.floor(random() * (headBlendRange.max - headBlendRange.min + 1)) +
+          headBlendRange.min,
+        shapeThirdID: 0,
+        skinFirstID:
+          Math.floor(random() * (headBlendRange.max - headBlendRange.min + 1)) +
+          headBlendRange.min,
+        skinSecondID:
+          Math.floor(random() * (headBlendRange.max - headBlendRange.min + 1)) +
+          headBlendRange.min,
+        skinThirdID: 0,
+        shapeMix: parseFloat((random() * 1.0).toFixed(2)),
+        skinMix: parseFloat((random() * 1.0).toFixed(2)),
+        thirdMix: 0.0,
+        isParent: false,
+      },
+    };
+
+    return baseAppearance;
   }
 
   hashCode(str) {
@@ -124,7 +132,7 @@ class CharacterManager {
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash = hash & hash;
     }
     return Math.abs(hash);
   }
