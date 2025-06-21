@@ -25,7 +25,7 @@ class AuthManager {
   onPlayerJoin(player) {
     console.log(`Player ${player.name} joined, showing login UI`);
     player.freezePosition = true;
-    player.spawn(new mp.Vector3(-1037.74, -2738.04, 20.17));
+    player.spawn(new mp.Vector3(-595.36, 24.91, 43.3));
     setTimeout(() => {
       this.showLoginUI(player);
     }, 1000);

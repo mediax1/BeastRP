@@ -2,8 +2,8 @@
   {
     "id": "1",
     "userId": "1",
-    "firstName": "dasd",
-    "lastName": "asdsa",
+    "firstName": "Mediax",
+    "lastName": "Fedorov",
     "gender": "male",
     "appearance": {
       "masks": 0,
@@ -40,9 +40,9 @@
     "health": 100,
     "armor": 0,
     "position": {
-      "x": -1037.74,
-      "y": -2738.04,
-      "z": 20.17
+      "x": -595.36,
+      "y": 24.91,
+      "z": 43.3
     }
   }
 ]

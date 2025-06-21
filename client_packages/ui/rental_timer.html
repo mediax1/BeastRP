@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Rental Timer</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Arial", sans-serif;
+        background: transparent;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        user-select: none;
+      }
+
+      .timer-container {
+        position: fixed;
+        top: 50px;
+        right: 20px;
+        background: rgba(255, 0, 0, 0.8);
+        border: 3px solid #ff0000;
+        border-radius: 15px;
+        padding: 20px;
+        min-width: 250px;
+        backdrop-filter: blur(5px);
+        animation: pulse 2s infinite;
+      }
+
+      .timer-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #ffffff;
+        margin-bottom: 10px;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .timer-display {
+        font-size: 24px;
+        font-weight: bold;
+        color: #ffffff;
+        text-align: center;
+        margin: 10px 0;
+      }
+
+      .timer-warning {
+        font-size: 12px;
+        color: #ffffff;
+        text-align: center;
+        margin-top: 10px;
+        font-style: italic;
+      }
+
+      .urgent {
+        animation: urgent-pulse 1s infinite;
+        background: rgba(255, 0, 0, 0.9);
+        border-color: #ff0000;
+      }
+
+      .warning {
+        background: rgba(255, 165, 0, 0.8);
+        border-color: #ffa500;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes urgent-pulse {
+        0% {
+          transform: scale(1);
+          background: rgba(255, 0, 0, 0.9);
+        }
+        50% {
+          transform: scale(1.1);
+          background: rgba(255, 0, 0, 1);
+        }
+        100% {
+          transform: scale(1);
+          background: rgba(255, 0, 0, 0.9);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="timer-container" id="timer-container">
+      <div class="timer-title">RENTAL VEHICLE TIMER</div>
+      <div class="timer-display" id="timer-display">200</div>
+      <div class="timer-warning">
+        Return to your vehicle before time expires!
+      </div>
+    </div>
+
+    <script>
+      function updateTimer(timeLeft) {
+        const timerDisplay = document.getElementById("timer-display");
+        const timerContainer = document.getElementById("timer-container");
+
+        timerDisplay.textContent = timeLeft;
+
+        timerContainer.className = "timer-container";
+
+        if (timeLeft <= 30) {
+          timerContainer.classList.add("urgent");
+          timerDisplay.style.color = "#ffffff";
+        } else if (timeLeft <= 60) {
+          timerContainer.classList.add("warning");
+          timerDisplay.style.color = "#ffffff";
+        } else {
+          timerDisplay.style.color = "#ffffff";
+        }
+
+        if (timeLeft <= 10 && timeLeft > 0) {
+          console.log("URGENT: " + timeLeft + " seconds left!");
+        }
+      }
+
+      // Initialize timer
+      updateTimer(200);
+    </script>
+  </body>
+</html>
