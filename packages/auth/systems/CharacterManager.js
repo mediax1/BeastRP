@@ -78,19 +78,31 @@ class CharacterManager {
   }
 
   generateRandomAppearance(userId, gender) {
-    const random = this.seededRandom(this.hashCode(userId.toString()));
+    const uniqueSeed = this.hashCode(
+      userId.toString() + gender + Date.now().toString()
+    );
+    const random = this.seededRandom(uniqueSeed);
 
     const isFemale = gender === "female";
     const headBlendRange = isFemale
       ? { min: 21, max: 45 }
       : { min: 0, max: 20 };
-    const hairRange = isFemale ? { min: 1, max: 20 } : { min: 1, max: 40 };
+
+    let hairStyle;
+    if (isFemale) {
+      hairStyle = Math.floor(random() * 20) + 1;
+    } else {
+      const maleHairChoices = [];
+      for (let i = 1; i <= 76; i++) {
+        if (i !== 23) maleHairChoices.push(i);
+      }
+      hairStyle =
+        maleHairChoices[Math.floor(random() * maleHairChoices.length)];
+    }
 
     const baseAppearance = {
       masks: 0,
-      hair:
-        Math.floor(random() * (hairRange.max - hairRange.min + 1)) +
-        hairRange.min,
+      hair: hairStyle,
       torso: 0,
       legs: 0,
       bags: 0,

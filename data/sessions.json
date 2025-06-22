@@ -14,5 +14,21 @@
     "createdAt": "2025-06-22T12:31:47.109Z",
     "expiresAt": "2025-06-23T12:31:47.109Z",
     "isActive": true
+  },
+  {
+    "id": "3",
+    "userId": "1",
+    "token": "session_1750595812994_zgcmdwups",
+    "createdAt": "2025-06-22T12:36:52.995Z",
+    "expiresAt": "2025-06-23T12:36:52.995Z",
+    "isActive": true
+  },
+  {
+    "id": "4",
+    "userId": "1",
+    "token": "session_1750595927684_cfs9lm8vn",
+    "createdAt": "2025-06-22T12:38:47.685Z",
+    "expiresAt": "2025-06-23T12:38:47.685Z",
+    "isActive": true
   }
 ]
