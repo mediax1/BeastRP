@@ -251,6 +251,10 @@ class AuthManager {
       player.setVariable("userId", null);
       player.setVariable("username", null);
       player.setVariable("sessionToken", null);
+      player.setVariable("characterId", null);
+      player.setVariable("characterName", null);
+      player.setVariable("money", null);
+      player.setVariable("bank", null);
 
       this.activeSessions.delete(player.id);
 
@@ -324,6 +328,8 @@ class AuthManager {
       "characterName",
       `${character.firstName} ${character.lastName}`
     );
+    player.setVariable("money", character.money || 0);
+    player.setVariable("bank", character.bank || 0);
   }
 
   applyCharacterAppearance(player, appearance) {

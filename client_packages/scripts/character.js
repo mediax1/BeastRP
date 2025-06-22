@@ -94,6 +94,17 @@ class CharacterCreationUI {
       }
       setTimeout(() => {
         this.hide();
+        if (global.hudManager) {
+          global.hudManager.show();
+          const characterId = mp.players.local.getVariable("characterId");
+          if (characterId) {
+            global.hudManager.setPlayerId(characterId);
+          }
+          const money = mp.players.local.getVariable("money") || 0;
+          const bank = mp.players.local.getVariable("bank") || 0;
+          console.log("HUD Debug - Money:", money, "Bank:", bank);
+          global.hudManager.setMoney(money, bank);
+        }
       }, 2000);
     } else {
       this.showError(message);

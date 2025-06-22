@@ -147,10 +147,32 @@ class AuthUI {
         global.authEvents.setAuthenticated(true);
         setTimeout(() => {
           this.hide();
+          if (global.hudManager) {
+            global.hudManager.show();
+            const characterId = mp.players.local.getVariable("characterId");
+            if (characterId) {
+              global.hudManager.setPlayerId(characterId);
+            }
+            const money = mp.players.local.getVariable("money") || 0;
+            const bank = mp.players.local.getVariable("bank") || 0;
+            console.log("HUD Debug - Money:", money, "Bank:", bank);
+            global.hudManager.setMoney(money, bank);
+          }
         }, 2000);
       } else {
         setTimeout(() => {
           this.hide();
+          if (global.hudManager) {
+            global.hudManager.show();
+            const characterId = mp.players.local.getVariable("characterId");
+            if (characterId) {
+              global.hudManager.setPlayerId(characterId);
+            }
+            const money = mp.players.local.getVariable("money") || 0;
+            const bank = mp.players.local.getVariable("bank") || 0;
+            console.log("HUD Debug - Money:", money, "Bank:", bank);
+            global.hudManager.setMoney(money, bank);
+          }
         }, 2000);
       }
     } else {
@@ -212,6 +234,9 @@ class AuthEvents {
     this.userData = null;
     this.hasCharacter = false;
     this.disableGameFeatures();
+    if (global.hudManager) {
+      global.hudManager.hide();
+    }
     mp.events.callRemote("auth:logout");
   }
 

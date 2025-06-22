@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HUD</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Rajdhani", sans-serif;
+        overflow: hidden;
+        user-select: none;
+        background: transparent;
+      }
+
+      .hud-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .server-info {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: #dc143c;
+        padding: 12px 20px;
+        text-shadow: 0 0 8px rgba(220, 20, 60, 0.6);
+        transition: all 0.3s ease;
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .server-info::before {
+        display: none;
+      }
+
+      .server-info::after {
+        display: none;
+      }
+
+      .server-name {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #dc143c;
+        text-shadow: 0 0 10px rgba(220, 20, 60, 0.8),
+          0 0 20px rgba(220, 20, 60, 0.4), 2px 2px 4px rgba(0, 0, 0, 0.8);
+      }
+
+      .player-id {
+        font-size: 14px;
+        color: #c0c0c0;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 6px rgba(192, 192, 192, 0.6),
+          1px 1px 2px rgba(0, 0, 0, 0.8);
+        margin-bottom: 185px;
+      }
+
+      .money-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+      }
+
+      .money-item {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 6px rgba(192, 192, 192, 0.6),
+          1px 1px 2px rgba(0, 0, 0, 0.8);
+      }
+
+      .wallet {
+        color: #32cd32;
+        text-shadow: 0 0 6px rgba(50, 205, 50, 0.6),
+          1px 1px 2px rgba(0, 0, 0, 0.8);
+      }
+
+      .bank {
+        color: #4169e1;
+        text-shadow: 0 0 6px rgba(65, 105, 225, 0.6),
+          1px 1px 2px rgba(0, 0, 0, 0.8);
+      }
+
+      .hud-container.hidden {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .hud-container:not(.hidden) {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hud-container" id="hudContainer">
+      <div class="server-info">
+        <div class="server-name" id="serverName">Beast RP</div>
+        <div class="player-id" id="playerId">ID: --</div>
+        <div class="money-info">
+          <div class="money-item wallet">Wallet: $0</div>
+          <div class="money-item bank">Bank: $0</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.addEventListener("message", function (event) {
+        const data = event.data;
+
+        switch (data.type) {
+          case "showHUD":
+            document.getElementById("hudContainer").classList.remove("hidden");
+            break;
+          case "hideHUD":
+            document.getElementById("hudContainer").classList.add("hidden");
+            break;
+          case "setServerName":
+            document.getElementById("serverName").textContent = data.serverName;
+            break;
+          case "setPlayerId":
+            document.getElementById(
+              "playerId"
+            ).textContent = `ID: ${data.playerId}`;
+            break;
+          case "setMoney":
+            document.querySelector(
+              ".wallet"
+            ).textContent = `Wallet: $${data.wallet}`;
+            document.querySelector(".bank").textContent = `Bank: $${data.bank}`;
+            break;
+        }
+      });
+    </script>
+  </body>
+</html>
