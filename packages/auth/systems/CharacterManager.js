@@ -60,7 +60,7 @@ class CharacterManager {
         bank: 5000,
         health: 100,
         armor: 0,
-        position: { x: -1037.74, y: -2738.04, z: 20.17 },
+        position: { x: -595.36, y: 24.91, z: 43.3 },
       };
 
       characters.push(character);

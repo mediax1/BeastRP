@@ -2,8 +2,8 @@
   {
     "id": "1",
     "userId": "1",
-    "firstName": "Mediax",
-    "lastName": "Fedorov",
+    "firstName": "lldasd",
+    "lastName": "dsadsad",
     "gender": "male",
     "appearance": {
       "masks": 0,
@@ -31,8 +31,8 @@
         "isParent": false
       }
     },
-    "createdAt": "2025-06-21T08:20:05.601Z",
-    "lastPlayed": "2025-06-21T08:20:05.601Z",
+    "createdAt": "2025-06-22T12:29:25.832Z",
+    "lastPlayed": "2025-06-22T12:29:25.832Z",
     "level": 1,
     "experience": 0,
     "money": 1000,
