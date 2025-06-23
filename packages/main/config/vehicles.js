@@ -62,9 +62,25 @@ module.exports = {
     faggio: "faggio",
     faggio2: "faggio2",
     faggio3: "faggio3",
+    // Fast helicopters
+    buzzard2: "buzzard2",
+    savage: "savage",
+    valkyrie: "valkyrie",
+    valkyrie2: "valkyrie2",
+    volatus: "volatus",
+    supervolito: "supervolito",
+    supervolito2: "supervolito2",
+    swift: "swift",
+    swift2: "swift2",
+    annihilator: "annihilator",
+    frogger: "frogger",
+    frogger2: "frogger2",
+    maverick: "maverick",
+    seashark: "seashark",
+    seashark2: "seashark2",
+    seashark3: "seashark3",
   },
 
-  // Vehicle spawn settings
   spawnSettings: {
     distance: 3,
     numberPlate: "RAGE",
@@ -72,7 +88,6 @@ module.exports = {
     engine: true,
   },
 
-  // Rental vehicle settings
   rentalSettings: {
     vehicles: ["faggio"],
     duration: 200,
