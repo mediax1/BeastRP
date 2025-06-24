@@ -26,6 +26,15 @@ class HUDManager {
     mp.events.add("hud:setMoney", this.setMoney.bind(this));
 
     mp.events.add("hud:updateMoney", this.updateMoney.bind(this));
+    // Listen for IST time updates from server
+    mp.events.add("updateISTTime", (hour, minute) => {
+      const formatted = `${hour.toString().padStart(2, "0")}:${minute
+        .toString()
+        .padStart(2, "0")}`;
+      this.browser.execute(
+        `window.postMessage({type: 'setISTTime', istTime: '${formatted}'}, '*');`
+      );
+    });
   }
 
   show() {

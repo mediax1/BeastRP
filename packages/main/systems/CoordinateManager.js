@@ -23,7 +23,6 @@ class CoordinateManager {
   }
 }
 
-// Create singleton instance
 const coordinateManager = new CoordinateManager();
 
 module.exports = coordinateManager;

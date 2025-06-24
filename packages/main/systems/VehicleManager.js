@@ -96,7 +96,6 @@ class VehicleManager {
   }
 }
 
-// Create singleton instance
 const vehicleManager = new VehicleManager();
 
 module.exports = vehicleManager;
