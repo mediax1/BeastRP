@@ -7,14 +7,14 @@ class AuthManager {
     this.pendingLogins = new Map();
   }
 
-  init() {
+  async init() {
+    await DatabaseManager.init();
+    await CharacterManager.init();
+
     this.setupEventHandlers();
-    CharacterManager.init();
 
-    // Perform session cleanup on server startup
-    this.performStartupCleanup();
+    await this.performStartupCleanup();
 
-    // Set up periodic session cleanup (every 30 minutes)
     this.setupPeriodicCleanup();
 
     console.log("AuthManager initialized");
@@ -32,28 +32,35 @@ class AuthManager {
   onPlayerJoin(player) {
     console.log(`Player ${player.name} joined, showing login UI`);
     player.freezePosition = true;
-    player.spawn(new mp.Vector3(-595.36, 24.91, 43.3));
+    const spawnPosition = new mp.Vector3(-595.71, 36.77, 43.61);
+    const heading = 180.0;
+
+    player.spawn(spawnPosition, heading);
     setTimeout(() => {
       this.showLoginUI(player);
     }, 1000);
   }
 
   onPlayerQuit(player) {
+    if (!player || !player.name) {
+      console.log("Player quit event received for invalid player object");
+      return;
+    }
+
     console.log(`Player ${player.name} left the server`);
 
-    // Get the session token and invalidate it in the database
-    const sessionToken = player.getVariable("sessionToken");
-    if (sessionToken) {
-      this.invalidateSession(sessionToken)
-        .then(() => {
-          console.log(`Session invalidated for player ${player.name}`);
-        })
-        .catch((error) => {
+    try {
+      const sessionToken = player.getVariable("sessionToken");
+      if (sessionToken) {
+        this.invalidateSession(sessionToken).catch((error) => {
           console.error(
             `Error invalidating session for player ${player.name}:`,
             error
           );
         });
+      }
+    } catch (error) {
+      console.error(`Error handling player quit for ${player.name}:`, error);
     }
 
     this.activeSessions.delete(player.id);
@@ -77,25 +84,25 @@ class AuthManager {
       if (result.success) {
         const sessionToken = this.generateSessionToken();
         const session = await DatabaseManager.createSession(
-          result.user.id,
+          result.user.userId,
           sessionToken
         );
 
         if (session) {
           this.activeSessions.set(player.id, {
-            userId: result.user.id,
+            userId: result.user.userId,
             username: result.user.username,
             sessionToken: sessionToken,
             loginTime: Date.now(),
           });
 
           player.setVariable("authenticated", true);
-          player.setVariable("userId", result.user.id);
+          player.setVariable("userId", result.user.userId);
           player.setVariable("username", result.user.username);
           player.setVariable("sessionToken", sessionToken);
 
           const character = await CharacterManager.getCharacterByUserId(
-            result.user.id
+            result.user.userId
           );
 
           if (!character) {
@@ -346,7 +353,7 @@ class AuthManager {
       this.applyCharacterAppearance(player, character.appearance);
     }, 2000);
 
-    player.setVariable("characterId", character.id);
+    player.setVariable("characterId", character.characterId);
     player.setVariable(
       "characterName",
       `${character.firstName} ${character.lastName}`
@@ -430,7 +437,12 @@ class AuthManager {
   }
 
   async invalidateSession(sessionToken) {
-    return await DatabaseManager.invalidateSession(sessionToken);
+    try {
+      return await DatabaseManager.invalidateSession(sessionToken);
+    } catch (error) {
+      console.error("Error invalidating session:", error);
+      return false;
+    }
   }
 
   isPlayerAuthenticated(player) {
@@ -447,24 +459,6 @@ class AuthManager {
 
   getActiveSessionCount() {
     return this.activeSessions.size;
-  }
-
-  async getSessionStats() {
-    try {
-      const DatabaseManager = require("./DatabaseManager.js");
-      const stats = await DatabaseManager.getStats();
-
-      return {
-        ...stats,
-        activeInMemory: this.activeSessions.size,
-        totalActive: stats.activeSessions,
-        totalSessions:
-          stats.activeSessions + (stats.totalSessions - stats.activeSessions),
-      };
-    } catch (error) {
-      console.error("Error getting session stats:", error);
-      return null;
-    }
   }
 
   validateUsername(username) {

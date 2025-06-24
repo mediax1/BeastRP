@@ -1,0 +1,16 @@
+{
+  "name": "ragemp-server",
+  "version": "1.0.0",
+  "description": "RAGE Multiplayer Server with MongoDB",
+  "main": "ragemp-server.exe",
+  "dependencies": {
+    "mongodb": "^4.17.2"
+  },
+  "scripts": {
+    "start": "ragemp-server.exe",
+    "install-deps": "npm install"
+  },
+  "keywords": ["ragemp", "gta5", "multiplayer", "mongodb"],
+  "author": "",
+  "license": "ISC"
+} 

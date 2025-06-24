@@ -62,7 +62,6 @@ class CommandsManager {
 
   async cleanupSessions(player) {
     try {
-      const AuthManager = require("../../auth/systems/AuthManager.js");
       const DatabaseManager = require("../../auth/systems/DatabaseManager.js");
 
       player.outputChatBox(
@@ -87,15 +86,12 @@ class CommandsManager {
 
   async showSessionStats(player) {
     try {
-      const AuthManager = require("../../auth/systems/AuthManager.js");
+      const DatabaseManager = require("../../auth/systems/DatabaseManager.js");
 
-      const stats = await AuthManager.getSessionStats();
+      const stats = await DatabaseManager.getStats();
 
       if (stats) {
         player.outputChatBox(`!{yellow}[SESSION STATS]!{white}`);
-        player.outputChatBox(
-          `!{cyan}Active in memory:!{white} ${stats.activeInMemory}`
-        );
         player.outputChatBox(
           `!{cyan}Active in database:!{white} ${stats.activeSessions}`
         );
@@ -103,6 +99,7 @@ class CommandsManager {
           `!{cyan}Total sessions:!{white} ${stats.totalSessions}`
         );
         player.outputChatBox(`!{cyan}Total users:!{white} ${stats.totalUsers}`);
+        player.outputChatBox(`!{cyan}Database type:!{white} ${stats.dbType}`);
       } else {
         player.outputChatBox(
           `!{red}[SESSION STATS]!{white} Unable to retrieve statistics.`

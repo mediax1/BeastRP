@@ -1,55 +1,73 @@
-const fs = require("fs");
-const path = require("path");
+const { MongoClient, ObjectId } = require("mongodb");
 
 class DatabaseManager {
   constructor() {
-    this.dbType = "JSON";
-    this.dataDir = path.join(__dirname, "../../../data");
-    this.usersFile = path.join(this.dataDir, "users.json");
-    this.sessionsFile = path.join(this.dataDir, "sessions.json");
+    this.dbType = "MongoDB";
+    this.client = null;
+    this.db = null;
+    this.collections = {
+      users: null,
+      sessions: null,
+      characters: null,
+    };
     this.nextUserId = 1;
-    this.nextSessionId = 1;
+    this.nextCharacterId = 1;
   }
 
-  ensureDataDirectory() {
-    if (!fs.existsSync(this.dataDir)) {
-      fs.mkdirSync(this.dataDir, { recursive: true });
-    }
-  }
-
-  init() {
-    this.ensureDataDirectory();
-    this.setupJSONDatabase();
-  }
-
-  setupJSONDatabase() {
-    this.ensureFile(this.usersFile, []);
-    this.ensureFile(this.sessionsFile, []);
-    this.loadNextIds();
-  }
-
-  ensureFile(filePath, defaultData) {
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2));
-    }
-  }
-
-  loadNextIds() {
+  async init() {
     try {
-      const users = this.readJSONFile(this.usersFile);
-      const sessions = this.readJSONFile(this.sessionsFile);
+      this.client = new MongoClient("mongodb://localhost:27017");
+      await this.client.connect();
+      this.db = this.client.db("ragemp_server");
 
-      if (users.length > 0) {
-        const maxUserId = Math.max(...users.map((u) => parseInt(u.id) || 0));
-        this.nextUserId = maxUserId + 1;
+      this.collections.users = this.db.collection("users");
+      this.collections.sessions = this.db.collection("sessions");
+      this.collections.characters = this.db.collection("characters");
+
+      await this.setupIndexes();
+      await this.loadNextIds();
+      console.log("MongoDB DatabaseManager initialized successfully");
+    } catch (error) {
+      console.error("Failed to initialize MongoDB:", error);
+      throw error;
+    }
+  }
+
+  async setupIndexes() {
+    await this.collections.users.createIndex({ username: 1 }, { unique: true });
+    await this.collections.users.createIndex({ email: 1 }, { unique: true });
+    await this.collections.sessions.createIndex({ token: 1 }, { unique: true });
+    await this.collections.sessions.createIndex(
+      { expiresAt: 1 },
+      { expireAfterSeconds: 0 }
+    );
+    await this.collections.characters.createIndex(
+      { userId: 1 },
+      { unique: true }
+    );
+  }
+
+  async loadNextIds() {
+    try {
+      const maxUser = await this.collections.users.findOne(
+        {},
+        { sort: { userId: -1 } }
+      );
+      if (maxUser && maxUser.userId) {
+        this.nextUserId = maxUser.userId + 1;
       }
 
-      if (sessions.length > 0) {
-        const maxSessionId = Math.max(
-          ...sessions.map((s) => parseInt(s.id) || 0)
-        );
-        this.nextSessionId = maxSessionId + 1;
+      const maxCharacter = await this.collections.characters.findOne(
+        {},
+        { sort: { characterId: -1 } }
+      );
+      if (maxCharacter && maxCharacter.characterId) {
+        this.nextCharacterId = maxCharacter.characterId + 1;
       }
+
+      console.log(
+        `Next User ID: ${this.nextUserId}, Next Character ID: ${this.nextCharacterId}`
+      );
     } catch (error) {
       console.error("Error loading next IDs:", error);
     }
@@ -57,13 +75,12 @@ class DatabaseManager {
 
   async createUser(userData) {
     try {
-      const users = this.readJSONFile(this.usersFile);
-
-      const existingUser = users.find(
-        (u) =>
-          u.username.toLowerCase() === userData.username.toLowerCase() ||
-          u.email.toLowerCase() === userData.email.toLowerCase()
-      );
+      const existingUser = await this.collections.users.findOne({
+        $or: [
+          { username: { $regex: new RegExp(`^${userData.username}$`, "i") } },
+          { email: { $regex: new RegExp(`^${userData.email}$`, "i") } },
+        ],
+      });
 
       if (existingUser) {
         return {
@@ -73,11 +90,11 @@ class DatabaseManager {
       }
 
       const newUser = {
-        id: this.nextUserId.toString(),
+        userId: this.nextUserId,
         username: userData.username,
         email: userData.email,
         password: this.hashPassword(userData.password),
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         lastLogin: null,
         isActive: true,
         level: 1,
@@ -89,8 +106,8 @@ class DatabaseManager {
         playTime: 0,
       };
 
-      users.push(newUser);
-      this.writeJSONFile(this.usersFile, users);
+      const result = await this.collections.users.insertOne(newUser);
+      newUser._id = result.insertedId;
       this.nextUserId++;
 
       console.log(`User created: ${userData.username}`);
@@ -103,12 +120,12 @@ class DatabaseManager {
 
   async authenticateUser(username, password) {
     try {
-      const users = this.readJSONFile(this.usersFile);
-      const user = users.find(
-        (u) =>
-          u.username.toLowerCase() === username.toLowerCase() ||
-          u.email.toLowerCase() === username.toLowerCase()
-      );
+      const user = await this.collections.users.findOne({
+        $or: [
+          { username: { $regex: new RegExp(`^${username}$`, "i") } },
+          { email: { $regex: new RegExp(`^${username}$`, "i") } },
+        ],
+      });
 
       if (!user) {
         return { success: false, error: "User not found" };
@@ -122,8 +139,8 @@ class DatabaseManager {
         return { success: false, error: "Account is disabled" };
       }
 
-      user.lastLogin = new Date().toISOString();
-      this.updateUser(user);
+      user.lastLogin = new Date();
+      await this.updateUser(user);
 
       console.log(`User authenticated: ${user.username}`);
       return { success: true, user: user };
@@ -135,8 +152,7 @@ class DatabaseManager {
 
   async getUserById(userId) {
     try {
-      const users = this.readJSONFile(this.usersFile);
-      return users.find((user) => user.id === userId);
+      return await this.collections.users.findOne({ userId: parseInt(userId) });
     } catch (error) {
       console.error("Error getting user by ID:", error);
       return null;
@@ -145,10 +161,9 @@ class DatabaseManager {
 
   async getUserByUsername(username) {
     try {
-      const users = this.readJSONFile(this.usersFile);
-      return users.find(
-        (user) => user.username.toLowerCase() === username.toLowerCase()
-      );
+      return await this.collections.users.findOne({
+        username: { $regex: new RegExp(`^${username}$`, "i") },
+      });
     } catch (error) {
       console.error("Error getting user by username:", error);
       return null;
@@ -157,15 +172,12 @@ class DatabaseManager {
 
   async updateUser(updatedUser) {
     try {
-      const users = this.readJSONFile(this.usersFile);
-      const index = users.findIndex((user) => user.id === updatedUser.id);
-
-      if (index !== -1) {
-        users[index] = updatedUser;
-        this.writeJSONFile(this.usersFile, users);
-        return true;
-      }
-      return false;
+      const { _id, ...updateData } = updatedUser;
+      const result = await this.collections.users.updateOne(
+        { _id: new ObjectId(_id) },
+        { $set: updateData }
+      );
+      return result.modifiedCount > 0;
     } catch (error) {
       console.error("Error updating user:", error);
       return false;
@@ -174,20 +186,16 @@ class DatabaseManager {
 
   async createSession(userId, token) {
     try {
-      const sessions = this.readJSONFile(this.sessionsFile);
-
       const session = {
-        id: this.nextSessionId.toString(),
         userId: userId,
         token: token,
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         isActive: true,
       };
 
-      sessions.push(session);
-      this.writeJSONFile(this.sessionsFile, sessions);
-      this.nextSessionId++;
+      const result = await this.collections.sessions.insertOne(session);
+      session._id = result.insertedId;
 
       return session;
     } catch (error) {
@@ -198,13 +206,11 @@ class DatabaseManager {
 
   async validateSession(token) {
     try {
-      const sessions = this.readJSONFile(this.sessionsFile);
-      const session = sessions.find(
-        (s) =>
-          s.token === token && s.isActive && new Date(s.expiresAt) > new Date()
-      );
-
-      return session;
+      return await this.collections.sessions.findOne({
+        token: token,
+        isActive: true,
+        expiresAt: { $gt: new Date() },
+      });
     } catch (error) {
       console.error("Error validating session:", error);
       return null;
@@ -213,111 +219,28 @@ class DatabaseManager {
 
   async invalidateSession(token) {
     try {
-      const sessions = this.readJSONFile(this.sessionsFile);
-      const index = sessions.findIndex((s) => s.token === token);
-
-      if (index !== -1) {
-        sessions[index].isActive = false;
-        this.writeJSONFile(this.sessionsFile, sessions);
-        return true;
-      }
-      return false;
+      const result = await this.collections.sessions.updateOne(
+        { token: token },
+        { $set: { isActive: false } }
+      );
+      return result.modifiedCount > 0;
     } catch (error) {
       console.error("Error invalidating session:", error);
       return false;
     }
   }
 
-  readJSONFile(filePath) {
-    try {
-      if (!fs.existsSync(filePath)) {
-        console.log(
-          `File ${filePath} does not exist, creating with default data`
-        );
-        this.ensureFile(filePath, []);
-        return [];
-      }
-
-      const data = fs.readFileSync(filePath, "utf8");
-      if (!data || data.trim() === "") {
-        console.log(
-          `File ${filePath} is empty, initializing with default data`
-        );
-        this.ensureFile(filePath, []);
-        return [];
-      }
-
-      return JSON.parse(data);
-    } catch (error) {
-      console.error(`Error reading file ${filePath}:`, error);
-      try {
-        const backupPath = filePath + ".backup." + Date.now();
-        if (fs.existsSync(filePath)) {
-          fs.copyFileSync(filePath, backupPath);
-          console.log(`Created backup of corrupted file: ${backupPath}`);
-        }
-        this.ensureFile(filePath, []);
-        return [];
-      } catch (backupError) {
-        console.error(`Failed to recover file ${filePath}:`, backupError);
-        return [];
-      }
-    }
-  }
-
-  writeJSONFile(filePath, data) {
-    try {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    } catch (error) {
-      console.error(`Error writing file ${filePath}:`, error);
-    }
-  }
-
-  hashPassword(password) {
-    return Buffer.from(password).toString("base64");
-  }
-
-  verifyPassword(password, hashedPassword) {
-    return this.hashPassword(password) === hashedPassword;
-  }
-
-  async getStats() {
-    try {
-      const users = this.readJSONFile(this.usersFile);
-      const sessions = this.readJSONFile(this.sessionsFile);
-
-      return {
-        totalUsers: users.length,
-        activeUsers: users.filter((u) => u.isActive).length,
-        activeSessions: sessions.filter((s) => s.isActive).length,
-        dbType: this.dbType,
-      };
-    } catch (error) {
-      console.error("Error getting database stats:", error);
-      return null;
-    }
-  }
-
   async cleanupExpiredSessions() {
     try {
-      const sessions = this.readJSONFile(this.sessionsFile);
-      const now = new Date();
-      const originalCount = sessions.length;
-
-      // Filter out expired sessions
-      const validSessions = sessions.filter((session) => {
-        const expiresAt = new Date(session.expiresAt);
-        return expiresAt > now && session.isActive;
+      const result = await this.collections.sessions.deleteMany({
+        $or: [{ expiresAt: { $lt: new Date() } }, { isActive: false }],
       });
 
-      const removedCount = originalCount - validSessions.length;
-
-      if (removedCount > 0) {
-        this.writeJSONFile(this.sessionsFile, validSessions);
-        console.log(`Cleaned up ${removedCount} expired sessions`);
+      if (result.deletedCount > 0) {
+        console.log(`Cleaned up ${result.deletedCount} expired sessions`);
       }
 
-      return removedCount;
+      return result.deletedCount;
     } catch (error) {
       console.error("Error cleaning up expired sessions:", error);
       return 0;
@@ -326,20 +249,15 @@ class DatabaseManager {
 
   async cleanupInactiveSessions() {
     try {
-      const sessions = this.readJSONFile(this.sessionsFile);
-      const originalCount = sessions.length;
+      const result = await this.collections.sessions.deleteMany({
+        isActive: false,
+      });
 
-      // Filter out inactive sessions
-      const activeSessions = sessions.filter((session) => session.isActive);
-
-      const removedCount = originalCount - activeSessions.length;
-
-      if (removedCount > 0) {
-        this.writeJSONFile(this.sessionsFile, activeSessions);
-        console.log(`Cleaned up ${removedCount} inactive sessions`);
+      if (result.deletedCount > 0) {
+        console.log(`Cleaned up ${result.deletedCount} inactive sessions`);
       }
 
-      return removedCount;
+      return result.deletedCount;
     } catch (error) {
       console.error("Error cleaning up inactive sessions:", error);
       return 0;
@@ -361,6 +279,44 @@ class DatabaseManager {
     } catch (error) {
       console.error("Error during full session cleanup:", error);
       return 0;
+    }
+  }
+
+  async getStats() {
+    try {
+      const totalUsers = await this.collections.users.countDocuments();
+      const activeUsers = await this.collections.users.countDocuments({
+        isActive: true,
+      });
+      const activeSessions = await this.collections.sessions.countDocuments({
+        isActive: true,
+      });
+      const totalSessions = await this.collections.sessions.countDocuments();
+
+      return {
+        totalUsers: totalUsers,
+        activeUsers: activeUsers,
+        activeSessions: activeSessions,
+        totalSessions: totalSessions,
+        dbType: this.dbType,
+      };
+    } catch (error) {
+      console.error("Error getting database stats:", error);
+      return null;
+    }
+  }
+
+  hashPassword(password) {
+    return Buffer.from(password).toString("base64");
+  }
+
+  verifyPassword(password, hashedPassword) {
+    return this.hashPassword(password) === hashedPassword;
+  }
+
+  async close() {
+    if (this.client) {
+      await this.client.close();
     }
   }
 }

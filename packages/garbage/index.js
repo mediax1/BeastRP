@@ -131,7 +131,7 @@ function startGarbageJob(player) {
   player.call("garbageJob:truckAssigned", [garbageTruck.id]);
 }
 
-function endGarbageJob(player, completed = false) {
+async function endGarbageJob(player, completed = false) {
   if (!player) {
     return;
   }
@@ -165,33 +165,28 @@ function endGarbageJob(player, completed = false) {
   if (completed && totalPayment > 0) {
     const characterId = player.getVariable("characterId");
     if (characterId) {
-      // Get current character data
-      const characters = characterManager.readJSONFile(
-        characterManager.charactersFile
-      );
-      const characterIndex = characters.findIndex((c) => c.id === characterId);
+      const character = await characterManager.getCharacterById(characterId);
 
-      if (characterIndex !== -1) {
-        const character = characters[characterIndex];
+      if (character) {
         const currentBank = character.bank || 0;
         const newBankBalance = currentBank + totalPayment;
 
-        character.bank = newBankBalance;
-        character.lastPlayed = new Date().toISOString();
-
-        character.position = {
-          x: player.position.x,
-          y: player.position.y,
-          z: player.position.z,
+        const updateData = {
+          bank: newBankBalance,
+          lastPlayed: new Date(),
+          position: {
+            x: player.position.x,
+            y: player.position.y,
+            z: player.position.z,
+          },
         };
 
-        characterManager.writeJSONFile(
-          characterManager.charactersFile,
-          characters
-        );
+        await characterManager.updateCharacter({
+          ...character,
+          ...updateData,
+        });
 
         player.setVariable("bank", newBankBalance);
-
         player.call("hud:updateMoney", [character.money || 0, newBankBalance]);
 
         console.log(
@@ -203,33 +198,28 @@ function endGarbageJob(player, completed = false) {
     const partialPayment = bagsCollected * GARBAGE_BAG_REWARD;
     const characterId = player.getVariable("characterId");
     if (characterId) {
-      const characters = characterManager.readJSONFile(
-        characterManager.charactersFile
-      );
-      const characterIndex = characters.findIndex((c) => c.id === characterId);
+      const character = await characterManager.getCharacterById(characterId);
 
-      if (characterIndex !== -1) {
-        const character = characters[characterIndex];
+      if (character) {
         const currentBank = character.bank || 0;
         const newBankBalance = currentBank + partialPayment;
 
-        character.bank = newBankBalance;
-        character.lastPlayed = new Date().toISOString();
-
-        // Save current position
-        character.position = {
-          x: player.position.x,
-          y: player.position.y,
-          z: player.position.z,
+        const updateData = {
+          bank: newBankBalance,
+          lastPlayed: new Date(),
+          position: {
+            x: player.position.x,
+            y: player.position.y,
+            z: player.position.z,
+          },
         };
 
-        characterManager.writeJSONFile(
-          characterManager.charactersFile,
-          characters
-        );
+        await characterManager.updateCharacter({
+          ...character,
+          ...updateData,
+        });
 
         player.setVariable("bank", newBankBalance);
-
         player.call("hud:updateMoney", [character.money || 0, newBankBalance]);
 
         console.log(

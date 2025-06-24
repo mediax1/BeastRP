@@ -1,4 +1,5 @@
 bin
 dotnet
 BugTrap-x64.dll
-data/
+node_modules
+maps

@@ -1,43 +1,20 @@
-const fs = require("fs");
-const path = require("path");
+const { ObjectId } = require("mongodb");
 const DatabaseManager = require("./DatabaseManager.js");
 
 class CharacterManager {
   constructor() {
-    this.charactersFile = path.join(__dirname, "../../../data/characters.json");
-    this.nextCharacterId = 1;
+    this.collection = null;
   }
 
-  init() {
-    this.ensureCharactersFile();
-    this.loadNextCharacterId();
-  }
-
-  ensureCharactersFile() {
-    if (!fs.existsSync(this.charactersFile)) {
-      fs.writeFileSync(this.charactersFile, JSON.stringify([], null, 2));
-    }
-  }
-
-  loadNextCharacterId() {
-    try {
-      const characters = this.readJSONFile(this.charactersFile);
-      if (characters.length > 0) {
-        const maxCharacterId = Math.max(
-          ...characters.map((c) => parseInt(c.id) || 0)
-        );
-        this.nextCharacterId = maxCharacterId + 1;
-      }
-    } catch (error) {
-      console.error("Error loading next character ID:", error);
-    }
+  async init() {
+    this.collection = DatabaseManager.collections.characters;
   }
 
   async createCharacter(userId, firstName, lastName, gender) {
     try {
-      const characters = this.readJSONFile(this.charactersFile);
-
-      const existingCharacter = characters.find((c) => c.userId === userId);
+      const existingCharacter = await this.collection.findOne({
+        userId: userId,
+      });
       if (existingCharacter) {
         return {
           success: false,
@@ -46,14 +23,14 @@ class CharacterManager {
       }
 
       const character = {
-        id: this.nextCharacterId.toString(),
+        characterId: DatabaseManager.nextCharacterId,
         userId: userId,
         firstName: firstName,
         lastName: lastName,
         gender: gender,
         appearance: this.generateRandomAppearance(userId, gender),
-        createdAt: new Date().toISOString(),
-        lastPlayed: new Date().toISOString(),
+        createdAt: new Date(),
+        lastPlayed: new Date(),
         level: 1,
         experience: 0,
         money: 1000,
@@ -63,9 +40,9 @@ class CharacterManager {
         position: { x: -595.36, y: 24.91, z: 43.3 },
       };
 
-      characters.push(character);
-      this.writeJSONFile(this.charactersFile, characters);
-      this.nextCharacterId++;
+      const result = await this.collection.insertOne(character);
+      character._id = result.insertedId;
+      DatabaseManager.nextCharacterId++;
 
       console.log(
         `Character created: ${firstName} ${lastName} (${gender}) for user ${userId}`
@@ -78,8 +55,9 @@ class CharacterManager {
   }
 
   generateRandomAppearance(userId, gender) {
+    const userIdString = userId ? userId.toString() : Date.now().toString();
     const uniqueSeed = this.hashCode(
-      userId.toString() + gender + Date.now().toString()
+      userIdString + gender + Date.now().toString()
     );
     const random = this.seededRandom(uniqueSeed);
 
@@ -158,55 +136,57 @@ class CharacterManager {
 
   async getCharacterByUserId(userId) {
     try {
-      const characters = this.readJSONFile(this.charactersFile);
-      return characters.find((c) => c.userId === userId);
+      return await this.collection.findOne({ userId: userId });
     } catch (error) {
       console.error("Error getting character by user ID:", error);
       return null;
     }
   }
 
+  async getCharacterById(characterId) {
+    try {
+      return await this.collection.findOne({
+        characterId: parseInt(characterId),
+      });
+    } catch (error) {
+      console.error("Error getting character by ID:", error);
+      return null;
+    }
+  }
+
   async updateCharacter(updatedCharacter) {
     try {
-      const characters = this.readJSONFile(this.charactersFile);
-      const index = characters.findIndex((c) => c.id === updatedCharacter.id);
-
-      if (index !== -1) {
-        characters[index] = updatedCharacter;
-        this.writeJSONFile(this.charactersFile, characters);
-        return true;
-      }
-      return false;
+      const { _id, ...updateData } = updatedCharacter;
+      const result = await this.collection.updateOne(
+        { _id: new ObjectId(_id) },
+        { $set: updateData }
+      );
+      return result.modifiedCount > 0;
     } catch (error) {
       console.error("Error updating character:", error);
       return false;
     }
   }
 
-  readJSONFile(filePath) {
+  async updateCharacterByUserId(userId, updateData) {
     try {
-      if (!fs.existsSync(filePath)) {
-        this.ensureCharactersFile();
-        return [];
-      }
-
-      const data = fs.readFileSync(filePath, "utf8");
-      if (!data || data.trim() === "") {
-        return [];
-      }
-
-      return JSON.parse(data);
+      const result = await this.collection.updateOne(
+        { userId: userId },
+        { $set: updateData }
+      );
+      return result.modifiedCount > 0;
     } catch (error) {
-      console.error(`Error reading file ${filePath}:`, error);
-      return [];
+      console.error("Error updating character by user ID:", error);
+      return false;
     }
   }
 
-  writeJSONFile(filePath, data) {
+  async getAllCharacters() {
     try {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+      return await this.collection.find({}).toArray();
     } catch (error) {
-      console.error(`Error writing file ${filePath}:`, error);
+      console.error("Error getting all characters:", error);
+      return [];
     }
   }
 }
