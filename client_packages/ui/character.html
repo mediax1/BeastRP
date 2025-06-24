@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Character Creation</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         margin: 0;
@@ -12,179 +16,444 @@
       }
 
       body {
-        font-family: "Arial", sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: "Rajdhani", sans-serif;
+        background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.8),
+            rgba(20, 20, 30, 0.9)
+          ),
+          url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(0,255,127,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/><circle cx="300" cy="300" r="3" fill="rgba(0,255,127,0.3)"/><circle cx="900" cy="500" r="2" fill="rgba(255,215,0,0.4)"/><circle cx="1500" cy="700" r="4" fill="rgba(255,0,100,0.3)"/><circle cx="700" cy="900" r="2" fill="rgba(0,191,255,0.4)"/></svg>');
+        background-size: cover, 100px 100px;
+        background-attachment: fixed;
         height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #333;
+        color: #e0e0e0;
         cursor: default;
         overflow: hidden;
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 25% 75%,
+            rgba(0, 255, 127, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 75% 25%,
+            rgba(255, 215, 0, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 50% 50%,
+            rgba(255, 0, 100, 0.1) 0%,
+            transparent 50%
+          );
+        animation: ambientLight 8s ease-in-out infinite alternate;
+      }
+
+      @keyframes ambientLight {
+        0% {
+          opacity: 0.3;
+        }
+        100% {
+          opacity: 0.6;
+        }
       }
 
       .container {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        padding: 40px;
-        width: 500px;
-        backdrop-filter: blur(10px);
+        background: linear-gradient(
+          145deg,
+          rgba(15, 15, 25, 0.95),
+          rgba(25, 25, 35, 0.95)
+        );
+        border: 2px solid rgba(0, 255, 127, 0.3);
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0, 255, 127, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 20px 40px rgba(0, 0, 0, 0.5);
+        padding: 45px;
+        width: 550px;
+        backdrop-filter: blur(20px);
+        position: relative;
+        z-index: 10;
+        animation: containerGlow 3s ease-in-out infinite alternate;
+      }
+
+      @keyframes containerGlow {
+        0% {
+          box-shadow: 0 0 30px rgba(0, 255, 127, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        100% {
+          box-shadow: 0 0 50px rgba(0, 255, 127, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            0 20px 40px rgba(0, 0, 0, 0.5);
+        }
       }
 
       .header {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 35px;
+        position: relative;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, #00ff7f, transparent);
+        border-radius: 2px;
       }
 
       .header h1 {
-        color: #333;
-        font-size: 28px;
-        margin-bottom: 10px;
+        font-family: "Orbitron", monospace;
+        color: #00ff7f;
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 12px;
+        text-shadow: 0 0 20px rgba(0, 255, 127, 0.5);
+        letter-spacing: 2px;
+        animation: titleGlow 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes titleGlow {
+        0% {
+          text-shadow: 0 0 20px rgba(0, 255, 127, 0.5);
+        }
+        100% {
+          text-shadow: 0 0 30px rgba(0, 255, 127, 0.8),
+            0 0 40px rgba(0, 255, 127, 0.3);
+        }
       }
 
       .header p {
-        color: #666;
-        font-size: 14px;
+        color: #b0b0b0;
+        font-size: 16px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
       }
 
       .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+        position: relative;
       }
 
       .form-group label {
         display: block;
-        margin-bottom: 8px;
-        color: #555;
+        margin-bottom: 10px;
+        color: #00ff7f;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(0, 255, 127, 0.3);
       }
 
       .form-group input {
         width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e1e5e9;
-        border-radius: 8px;
-        font-size: 14px;
-        transition: border-color 0.3s ease;
-        background: #f8f9fa;
+        padding: 15px 20px;
+        border: 2px solid rgba(0, 255, 127, 0.3);
+        border-radius: 12px;
+        font-size: 16px;
+        font-family: "Rajdhani", sans-serif;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: linear-gradient(
+          145deg,
+          rgba(10, 10, 20, 0.8),
+          rgba(20, 20, 30, 0.8)
+        );
+        color: #e0e0e0;
         cursor: text;
+        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
       }
 
       .form-group input:focus {
         outline: none;
-        border-color: #667eea;
-        background: #fff;
+        border-color: #00ff7f;
+        background: linear-gradient(
+          145deg,
+          rgba(15, 15, 25, 0.9),
+          rgba(25, 25, 35, 0.9)
+        );
+        box-shadow: 0 0 20px rgba(0, 255, 127, 0.3),
+          inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .form-group input::placeholder {
+        color: #666;
+        font-style: italic;
       }
 
       .gender-section {
-        margin: 25px 0;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 10px;
-        border: 2px solid #e1e5e9;
+        margin: 30px 0;
+        padding: 25px;
+        background: linear-gradient(
+          145deg,
+          rgba(10, 10, 20, 0.6),
+          rgba(20, 20, 30, 0.6)
+        );
+        border-radius: 15px;
+        border: 2px solid rgba(0, 255, 127, 0.2);
+        position: relative;
+        backdrop-filter: blur(10px);
+      }
+
+      .gender-section::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: 20px;
+        right: 20px;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 255, 127, 0.5),
+          transparent
+        );
+        border-radius: 1px;
       }
 
       .gender-section h3 {
-        margin-bottom: 15px;
-        color: #333;
-        font-size: 16px;
+        margin-bottom: 20px;
+        color: #00ff7f;
+        font-size: 18px;
         text-align: center;
+        font-family: "Orbitron", monospace;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        text-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
       }
 
       .gender-options {
         display: flex;
-        gap: 15px;
+        gap: 20px;
         justify-content: center;
       }
 
       .gender-option {
         flex: 1;
-        padding: 15px;
-        border: 2px solid #e1e5e9;
-        border-radius: 8px;
+        padding: 20px;
+        border: 2px solid rgba(0, 255, 127, 0.3);
+        border-radius: 12px;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: white;
+        background: linear-gradient(
+          145deg,
+          rgba(15, 15, 25, 0.7),
+          rgba(25, 25, 35, 0.7)
+        );
         font-weight: 600;
+        font-size: 16px;
+        color: #b0b0b0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .gender-option::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 255, 127, 0.1),
+          transparent
+        );
+        transition: left 0.5s;
       }
 
       .gender-option:hover {
-        border-color: #667eea;
-        background: #f0f4ff;
+        border-color: #00ff7f;
+        background: linear-gradient(
+          145deg,
+          rgba(20, 20, 30, 0.8),
+          rgba(30, 30, 40, 0.8)
+        );
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 255, 127, 0.2);
+        color: #e0e0e0;
+      }
+
+      .gender-option:hover::before {
+        left: 100%;
       }
 
       .gender-option.selected {
-        border-color: #667eea;
-        background: #667eea;
-        color: white;
+        border-color: #00ff7f;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 255, 127, 0.2),
+          rgba(0, 255, 127, 0.1)
+        );
+        color: #00ff7f;
+        box-shadow: 0 0 30px rgba(0, 255, 127, 0.3),
+          inset 0 1px 0 rgba(0, 255, 127, 0.2);
+        text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);
       }
 
       .gender-option .icon {
-        font-size: 24px;
-        margin-bottom: 8px;
+        font-size: 32px;
+        margin-bottom: 12px;
         display: block;
+        filter: grayscale(1) brightness(0.7);
+        transition: all 0.3s ease;
+      }
+
+      .gender-option:hover .icon,
+      .gender-option.selected .icon {
+        filter: none;
+        transform: scale(1.1);
+      }
+
+      .gender-option div {
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-family: "Orbitron", monospace;
+        font-weight: 600;
       }
 
       .btn {
         width: 100%;
-        padding: 12px;
+        padding: 16px;
         border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        font-family: "Orbitron", monospace;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .btn:hover::before {
+        left: 100%;
       }
 
       .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #00ff7f 0%, #00cc66 100%);
+        color: #000;
+        box-shadow: 0 8px 25px rgba(0, 255, 127, 0.3);
       }
 
       .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0, 255, 127, 0.4);
+        background: linear-gradient(135deg, #00ff7f 0%, #00ff7f 100%);
+      }
+
+      .btn-primary:active {
+        transform: translateY(-1px);
       }
 
       .message {
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-        font-size: 14px;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 15px;
+        font-weight: 500;
         display: none;
         word-wrap: break-word;
+        border-left: 4px solid;
+        animation: messageSlide 0.3s ease-out;
+      }
+
+      @keyframes messageSlide {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
       }
 
       .message.error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+        background: linear-gradient(
+          145deg,
+          rgba(255, 59, 48, 0.1),
+          rgba(255, 59, 48, 0.05)
+        );
+        color: #ff6b6b;
+        border-left-color: #ff3b30;
+        box-shadow: 0 4px 15px rgba(255, 59, 48, 0.2);
       }
 
       .message.success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        background: linear-gradient(
+          145deg,
+          rgba(52, 199, 89, 0.1),
+          rgba(52, 199, 89, 0.05)
+        );
+        color: #00ff7f;
+        border-left-color: #34c759;
+        box-shadow: 0 4px 15px rgba(52, 199, 89, 0.2);
       }
 
       .loading {
         display: none;
         text-align: center;
-        margin: 10px 0;
+        margin: 15px 0;
+        color: #00ff7f;
+        font-weight: 600;
+        font-family: "Orbitron", monospace;
+        text-transform: uppercase;
+        letter-spacing: 2px;
       }
 
       .loading::after {
         content: "";
         display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #667eea;
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(0, 255, 127, 0.3);
+        border-top: 3px solid #00ff7f;
         border-radius: 50%;
         animation: spin 1s linear infinite;
+        margin-left: 15px;
+        vertical-align: middle;
       }
 
       @keyframes spin {
@@ -195,21 +464,93 @@
           transform: rotate(360deg);
         }
       }
+
+      .cyber-line {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00ff7f, transparent);
+        animation: cyberScan 4s linear infinite;
+      }
+
+      .cyber-line:nth-child(1) {
+        top: 15%;
+        left: 0;
+        right: 0;
+        animation-delay: 0s;
+      }
+
+      .cyber-line:nth-child(2) {
+        top: 75%;
+        left: 0;
+        right: 0;
+        animation-delay: 2s;
+      }
+
+      @keyframes cyberScan {
+        0% {
+          opacity: 0;
+          transform: translateX(-100%);
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+      }
+
+      .focus-indicator {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        width: 100%;
+        background: linear-gradient(90deg, #00ff7f, #00cc66);
+        opacity: 0;
+        transform: scaleX(0);
+        transition: all 0.3s ease;
+        border-radius: 1px;
+      }
+
+      .form-group input:focus + .focus-indicator {
+        opacity: 1;
+        transform: scaleX(1);
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          width: 90%;
+          padding: 30px;
+        }
+
+        .gender-options {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .header h1 {
+          font-size: 28px;
+        }
+      }
     </style>
   </head>
   <body>
+    <div class="cyber-line"></div>
+    <div class="cyber-line"></div>
+
     <div class="container">
       <div class="header">
-        <h1>Create Your Character</h1>
-        <p>Set your character's name and choose your gender</p>
+        <h1>CHARACTER GENESIS</h1>
+        <p>Initialize Your Digital Identity</p>
       </div>
 
       <div id="message" class="message"></div>
-      <div id="loading" class="loading"></div>
+      <div id="loading" class="loading">PROCESSING</div>
 
       <form onsubmit="handleCharacterCreation(event)">
         <div class="form-group">
-          <label for="firstName">First Name</label>
+          <label for="firstName">FIRST NAME</label>
           <input
             type="text"
             id="firstName"
@@ -219,10 +560,11 @@
             maxlength="20"
             placeholder="Enter your first name"
           />
+          <div class="focus-indicator"></div>
         </div>
 
         <div class="form-group">
-          <label for="lastName">Last Name</label>
+          <label for="lastName">LAST NAME</label>
           <input
             type="text"
             id="lastName"
@@ -232,10 +574,11 @@
             maxlength="20"
             placeholder="Enter your last name"
           />
+          <div class="focus-indicator"></div>
         </div>
 
         <div class="gender-section">
-          <h3>Choose Your Gender</h3>
+          <h3>SELECT AVATAR TYPE</h3>
           <div class="gender-options">
             <div
               class="gender-option"
@@ -243,7 +586,7 @@
               onclick="selectGender('male')"
             >
               <span class="icon">👨</span>
-              <div>Male</div>
+              <div>MALE</div>
             </div>
             <div
               class="gender-option"
@@ -251,12 +594,14 @@
               onclick="selectGender('female')"
             >
               <span class="icon">👩</span>
-              <div>Female</div>
+              <div>FEMALE</div>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Create Character</button>
+        <button type="submit" class="btn btn-primary">
+          INITIALIZE CHARACTER
+        </button>
       </form>
     </div>
 
@@ -283,17 +628,25 @@
         const lastName = formData.get("lastName").trim();
 
         if (!firstName || !lastName) {
-          showMessage("error", "Please fill in both first and last name");
+          showMessage("error", "Both first and last name are required");
           return;
         }
 
         if (firstName.length < 2 || lastName.length < 2) {
-          showMessage("error", "Names must be at least 2 characters long");
+          showMessage("error", "Names must contain at least 2 characters");
           return;
         }
 
         if (firstName.length > 20 || lastName.length > 20) {
-          showMessage("error", "Names must be less than 20 characters");
+          showMessage("error", "Names cannot exceed 20 characters");
+          return;
+        }
+
+        if (
+          !/^[a-zA-Z\s]+$/.test(firstName) ||
+          !/^[a-zA-Z\s]+$/.test(lastName)
+        ) {
+          showMessage("error", "Names can only contain letters and spaces");
           return;
         }
 
@@ -337,7 +690,7 @@
 
         setTimeout(() => {
           hideMessage();
-        }, 5000);
+        }, 6000);
       }
 
       function hideMessage() {
@@ -354,12 +707,37 @@
       window.hideMessage = hideMessage;
       window.showLoading = showLoading;
 
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && event.target.tagName !== "BUTTON") {
+          const form = event.target.closest("form");
+          if (form) {
+            const inputs = Array.from(form.querySelectorAll("input"));
+            const currentIndex = inputs.indexOf(event.target);
+            const nextInput = inputs[currentIndex + 1];
+
+            if (nextInput) {
+              event.preventDefault();
+              nextInput.focus();
+            }
+          }
+        }
+      });
+
       document.addEventListener("DOMContentLoaded", function () {
-        // Set default gender selection
         selectGender("male");
         setTimeout(() => {
           document.getElementById("firstName").focus();
-        }, 100);
+        }, 200);
+      });
+
+      document.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentElement.style.transform = "translateY(-2px)";
+        });
+
+        input.addEventListener("blur", function () {
+          this.parentElement.style.transform = "translateY(0)";
+        });
       });
     </script>
   </body>

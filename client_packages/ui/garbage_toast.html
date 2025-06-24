@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garbage Toast Notification</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        }
+        
+        body {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            background-color: transparent;
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        /* Toast notification styles */
+        .toast {
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            transform: translateY(50px);
+            opacity: 0;
+            animation: slideIn 0.4s forwards, fadeOut 0.4s 2.6s forwards;
+            max-width: 350px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            margin-left: -175px; /* Half of max-width */
+        }
+        
+        .toast-icon {
+            margin-right: 12px;
+            font-size: 22px;
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(76, 175, 80, 0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+        
+        .toast-message {
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .toast-detail {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 3px;
+            font-weight: normal;
+        }
+        
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast-notification">
+        <div class="toast-icon">✓</div>
+        <div class="toast-message" id="toast-message-container">
+            <span id="toast-message">Bag loaded</span>
+            <span class="toast-detail" id="toast-detail"></span>
+        </div>
+    </div>
+
+    <script>
+        // Get the message from RAGE MP if provided
+        function updateToastMessage(message) {
+            // Check if the message contains bag count information
+            if (message && message.includes('Total:')) {
+                // Split the message into main text and detail
+                const parts = message.split('Total:');
+                const mainMessage = parts[0].trim();
+                const detailMessage = 'Total: ' + parts[1].trim();
+                
+                // Update the main message
+                const messageElement = document.getElementById('toast-message');
+                if (messageElement) {
+                    messageElement.textContent = mainMessage;
+                }
+                
+                // Update the detail message
+                const detailElement = document.getElementById('toast-detail');
+                if (detailElement) {
+                    detailElement.textContent = detailMessage;
+                }
+            } else {
+                // Just update the main message
+                const messageElement = document.getElementById('toast-message');
+                if (messageElement && message) {
+                    messageElement.textContent = message;
+                }
+                
+                // Clear the detail
+                const detailElement = document.getElementById('toast-detail');
+                if (detailElement) {
+                    detailElement.textContent = '';
+                }
+            }
+        }
+
+        // Auto-close after animation completes (3 seconds total)
+        setTimeout(() => {
+            // Notify RAGE MP that toast is complete
+            try {
+                mp.trigger('garbageToast:complete');
+            } catch (e) {
+                console.log('Error triggering event:', e);
+            }
+        }, 3000);
+
+        // Expose function to RAGE MP
+        window.updateToastMessage = updateToastMessage;
+    </script>
+</body>
+</html>

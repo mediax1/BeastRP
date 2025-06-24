@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garbage Job Timer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        .timer-container {
+            position: absolute;
+            top: 20%;
+            right: 20px;
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff3300;
+            border-radius: 5px;
+            padding: 10px;
+            color: white;
+            text-align: center;
+            transform: translateY(-50%);
+            box-shadow: 0 0 10px rgba(255, 51, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        
+        .timer-header {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ff3300;
+            text-transform: uppercase;
+        }
+        
+        .timer-message {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        
+        .timer-countdown {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 5px 0;
+            color: #ffffff;
+            text-shadow: 0 0 5px #ff3300;
+        }
+        
+        .timer-progress {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: #ff3300;
+            border-radius: 5px;
+            transition: width 1s linear;
+        }
+        
+        .warning {
+            animation: pulse 1s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% {
+                text-shadow: 0 0 5px #ff3300;
+            }
+            100% {
+                text-shadow: 0 0 15px #ff3300, 0 0 30px #ff3300;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.5s forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-container" id="timer-container">
+        <div class="timer-header">WARNING</div>
+        <div class="timer-message">Return to your garbage truck!</div>
+        <div class="timer-countdown" id="countdown">2:00</div>
+        <div class="timer-progress">
+            <div class="timer-bar" id="timer-bar"></div>
+        </div>
+    </div>
+
+    <script>
+        // Total time in seconds (2 minutes)
+        const TOTAL_TIME = 120;
+        let timeRemaining = TOTAL_TIME;
+        let timerInterval;
+        let isTimerActive = false;
+        
+        // Function to start the timer
+        function startTimer() {
+            if (isTimerActive) return;
+            
+            isTimerActive = true;
+            timeRemaining = TOTAL_TIME;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    isTimerActive = false;
+                    // Notify the game that time is up
+                    mp.trigger('garbageJob:timerExpired');
+                }
+            }, 1000);
+        }
+        
+        // Function to stop the timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+            isTimerActive = false;
+            
+            // Add fade-out class
+            document.getElementById('timer-container').classList.add('fade-out');
+            
+            // Remove the timer after animation completes
+            setTimeout(() => {
+                mp.trigger('garbageJob:timerClosed');
+            }, 500);
+        }
+        
+        // Function to update the timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('countdown').textContent = formattedTime;
+            
+            // Update progress bar
+            const progressPercent = (timeRemaining / TOTAL_TIME) * 100;
+            document.getElementById('timer-bar').style.width = `${progressPercent}%`;
+            
+            // Add warning class when less than 30 seconds remain
+            if (timeRemaining <= 30) {
+                document.getElementById('countdown').classList.add('warning');
+            } else {
+                document.getElementById('countdown').classList.remove('warning');
+            }
+        }
+        
+        // Start the timer when the page loads
+        window.addEventListener('load', () => {
+            startTimer();
+        });
+    </script>
+</body>
+</html>

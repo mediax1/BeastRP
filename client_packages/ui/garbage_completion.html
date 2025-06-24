@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Garbage Job Completion</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", "Arial", sans-serif;
+      }
+
+      body {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+        overflow: hidden;
+      }
+      .container {
+        width: 500px;
+        background: rgba(0, 0, 0, 0.85);
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        color: white;
+        overflow: hidden;
+        opacity: 0;
+        transform: scale(0.9);
+        animation: zoomIn 0.5s ease-out forwards;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+        padding: 25px;
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        border-bottom: 3px solid #f57c00;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      .content {
+        padding: 30px 25px;
+        text-align: center;
+      }
+
+      .mission-complete {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #4caf50;
+        text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        animation: pulse 2s infinite;
+      }
+
+      .stats {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        font-size: 18px;
+      }
+
+      .stat-label {
+        font-weight: bold;
+        color: #ffc107;
+      }
+
+      .stat-value {
+        font-weight: bold;
+      }
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        font-size: 22px;
+        font-weight: bold;
+      }
+
+      .total-label {
+        color: #4caf50;
+      }
+
+      .message {
+        margin-top: 20px;
+        font-size: 16px;
+        color: #bbbbbb;
+      }
+
+      @keyframes zoomIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        50% {
+          text-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+        }
+        100% {
+          text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+      }
+
+      .countdown {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.5);
+        color: #bbbbbb;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="completion-dialog">
+      <div class="header">Job Completed</div>
+      <div class="content">
+        <div class="mission-complete">MISSION COMPLETE</div>
+
+        <div class="stats">
+          <div class="stat-row">
+            <span class="stat-label">Garbage Bags Collected:</span>
+            <span class="stat-value" id="bags-collected">5</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Pay Per Bag:</span>
+            <span class="stat-value">$100</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Total Payment:</span>
+            <span class="total-value" id="total-payment">$500</span>
+          </div>
+        </div>
+
+        <div class="message">Thank you for keeping our city clean!</div>
+      </div>
+
+      <div class="countdown" id="countdown">Closing in 5s</div>
+    </div>
+
+    <script>
+      const countdownElement = document.getElementById("countdown");
+      const bagsCollectedElement = document.getElementById("bags-collected");
+      const totalPaymentElement = document.getElementById("total-payment");
+
+      const bagsCollected = Math.floor(Math.random() * 5) + 3; // 3-7 bags
+      const payPerBag = 100;
+      const totalPayment = bagsCollected * payPerBag;
+
+      bagsCollectedElement.textContent = bagsCollected;
+      totalPaymentElement.textContent = `$${totalPayment}`;
+
+      let secondsLeft = 5;
+
+      const countdownInterval = setInterval(() => {
+        secondsLeft--;
+        countdownElement.textContent = `Closing in ${secondsLeft}s`;
+
+        if (secondsLeft <= 0) {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>

@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RAGE:MP Login</title>
+    <title>Beast RP</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         margin: 0;
@@ -12,169 +16,367 @@
       }
 
       body {
-        font-family: "Arial", sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: "Rajdhani", sans-serif;
+        background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.8),
+            rgba(20, 20, 30, 0.9)
+          ),
+          url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(0,255,127,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/><circle cx="200" cy="200" r="3" fill="rgba(0,255,127,0.3)"/><circle cx="800" cy="400" r="2" fill="rgba(255,215,0,0.4)"/><circle cx="1400" cy="600" r="4" fill="rgba(255,0,100,0.3)"/><circle cx="600" cy="800" r="2" fill="rgba(0,191,255,0.4)"/></svg>');
+        background-size: cover, 100px 100px;
+        background-attachment: fixed;
         height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #333;
+        color: #e0e0e0;
         cursor: default;
         overflow: hidden;
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 20% 80%,
+            rgba(0, 255, 127, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 215, 0, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 40%,
+            rgba(255, 0, 100, 0.1) 0%,
+            transparent 50%
+          );
+        animation: ambientLight 8s ease-in-out infinite alternate;
+      }
+
+      @keyframes ambientLight {
+        0% {
+          opacity: 0.3;
+        }
+        100% {
+          opacity: 0.6;
+        }
       }
 
       .container {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        padding: 40px;
-        width: 400px;
-        backdrop-filter: blur(10px);
+        background: linear-gradient(
+          145deg,
+          rgba(15, 15, 25, 0.95),
+          rgba(25, 25, 35, 0.95)
+        );
+        border: 2px solid rgba(0, 255, 127, 0.3);
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0, 255, 127, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 20px 40px rgba(0, 0, 0, 0.5);
+        padding: 45px;
+        width: 450px;
+        backdrop-filter: blur(20px);
         position: relative;
+        z-index: 10;
+        animation: containerGlow 3s ease-in-out infinite alternate;
+      }
+
+      @keyframes containerGlow {
+        0% {
+          box-shadow: 0 0 30px rgba(0, 255, 127, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        100% {
+          box-shadow: 0 0 50px rgba(0, 255, 127, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            0 20px 40px rgba(0, 0, 0, 0.5);
+        }
       }
 
       .header {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 35px;
+        position: relative;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, #00ff7f, transparent);
+        border-radius: 2px;
       }
 
       .header h1 {
-        color: #333;
-        font-size: 28px;
-        margin-bottom: 10px;
+        font-family: "Orbitron", monospace;
+        color: #00ff7f;
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 12px;
+        text-shadow: 0 0 20px rgba(0, 255, 127, 0.5);
+        letter-spacing: 2px;
+        animation: titleGlow 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes titleGlow {
+        0% {
+          text-shadow: 0 0 20px rgba(0, 255, 127, 0.5);
+        }
+        100% {
+          text-shadow: 0 0 30px rgba(0, 255, 127, 0.8),
+            0 0 40px rgba(0, 255, 127, 0.3);
+        }
       }
 
       .header p {
-        color: #666;
-        font-size: 14px;
+        color: #b0b0b0;
+        font-size: 16px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
       }
 
       .form-container {
         display: none;
+        animation: fadeIn 0.5s ease-out;
       }
 
       .form-container.active {
         display: block;
       }
 
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
       .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+        position: relative;
       }
 
       .form-group label {
         display: block;
-        margin-bottom: 8px;
-        color: #555;
+        margin-bottom: 10px;
+        color: #00ff7f;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(0, 255, 127, 0.3);
       }
 
       .form-group input {
         width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e1e5e9;
-        border-radius: 8px;
-        font-size: 14px;
-        transition: border-color 0.3s ease;
-        background: #f8f9fa;
+        padding: 15px 20px;
+        border: 2px solid rgba(0, 255, 127, 0.3);
+        border-radius: 12px;
+        font-size: 16px;
+        font-family: "Rajdhani", sans-serif;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: linear-gradient(
+          145deg,
+          rgba(10, 10, 20, 0.8),
+          rgba(20, 20, 30, 0.8)
+        );
+        color: #e0e0e0;
         cursor: text;
+        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
       }
 
       .form-group input:focus {
         outline: none;
-        border-color: #667eea;
-        background: #fff;
+        border-color: #00ff7f;
+        background: linear-gradient(
+          145deg,
+          rgba(15, 15, 25, 0.9),
+          rgba(25, 25, 35, 0.9)
+        );
+        box-shadow: 0 0 20px rgba(0, 255, 127, 0.3),
+          inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .form-group input::placeholder {
+        color: #666;
+        font-style: italic;
       }
 
       .btn {
         width: 100%;
-        padding: 12px;
+        padding: 16px;
         border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        font-family: "Orbitron", monospace;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .btn:hover::before {
+        left: 100%;
       }
 
       .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #00ff7f 0%, #00cc66 100%);
+        color: #000;
+        box-shadow: 0 8px 25px rgba(0, 255, 127, 0.3);
       }
 
       .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0, 255, 127, 0.4);
+        background: linear-gradient(135deg, #00ff7f 0%, #00ff7f 100%);
       }
 
-      .btn-secondary {
-        background: #6c757d;
-        color: white;
-      }
-
-      .btn-secondary:hover {
-        background: #5a6268;
+      .btn-primary:active {
+        transform: translateY(-1px);
       }
 
       .switch-mode {
         text-align: center;
-        margin-top: 20px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(0, 255, 127, 0.2);
+      }
+
+      .switch-mode p {
+        color: #b0b0b0;
+        font-size: 15px;
+        margin-bottom: 10px;
       }
 
       .switch-mode a {
-        color: #667eea;
+        color: #00ff7f;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
+        transition: all 0.3s ease;
+        text-shadow: 0 0 10px rgba(0, 255, 127, 0.3);
+        padding: 5px 10px;
+        border-radius: 6px;
       }
 
       .switch-mode a:hover {
-        text-decoration: underline;
+        text-decoration: none;
+        background: rgba(0, 255, 127, 0.1);
+        text-shadow: 0 0 15px rgba(0, 255, 127, 0.6);
       }
 
       .message {
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-        font-size: 14px;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 15px;
+        font-weight: 500;
         display: none;
         word-wrap: break-word;
+        border-left: 4px solid;
+        animation: messageSlide 0.3s ease-out;
+      }
+
+      @keyframes messageSlide {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
       }
 
       .message.error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+        background: linear-gradient(
+          145deg,
+          rgba(255, 59, 48, 0.1),
+          rgba(255, 59, 48, 0.05)
+        );
+        color: #ff6b6b;
+        border-left-color: #ff3b30;
+        box-shadow: 0 4px 15px rgba(255, 59, 48, 0.2);
       }
 
       .message.success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        background: linear-gradient(
+          145deg,
+          rgba(52, 199, 89, 0.1),
+          rgba(52, 199, 89, 0.05)
+        );
+        color: #00ff7f;
+        border-left-color: #34c759;
+        box-shadow: 0 4px 15px rgba(52, 199, 89, 0.2);
       }
 
       .message.info {
-        background: #d1ecf1;
-        color: #0c5460;
-        border: 1px solid #bee5eb;
+        background: linear-gradient(
+          145deg,
+          rgba(0, 122, 255, 0.1),
+          rgba(0, 122, 255, 0.05)
+        );
+        color: #64b5f6;
+        border-left-color: #007aff;
+        box-shadow: 0 4px 15px rgba(0, 122, 255, 0.2);
       }
 
       .loading {
         display: none;
         text-align: center;
-        margin: 10px 0;
+        margin: 15px 0;
+        color: #00ff7f;
+        font-weight: 600;
       }
 
       .loading::after {
         content: "";
         display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #667eea;
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(0, 255, 127, 0.3);
+        border-top: 3px solid #00ff7f;
         border-radius: 50%;
         animation: spin 1s linear infinite;
+        margin-left: 10px;
+        vertical-align: middle;
       }
 
       @keyframes spin {
@@ -188,74 +390,154 @@
 
       .close-btn {
         position: absolute;
-        top: 15px;
-        right: 15px;
-        background: none;
-        border: none;
-        font-size: 24px;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        font-size: 20px;
         cursor: pointer;
-        color: #666;
-        width: 30px;
-        height: 30px;
+        color: #b0b0b0;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
       }
 
       .close-btn:hover {
-        color: #333;
-        background: rgba(0, 0, 0, 0.1);
-        border-radius: 50%;
+        color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.1);
+        border-color: rgba(255, 107, 107, 0.3);
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+      }
+
+      /* Cyber elements */
+      .cyber-line {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00ff7f, transparent);
+        animation: cyberScan 4s linear infinite;
+      }
+
+      .cyber-line:nth-child(1) {
+        top: 20%;
+        left: 0;
+        right: 0;
+        animation-delay: 0s;
+      }
+
+      .cyber-line:nth-child(2) {
+        top: 60%;
+        left: 0;
+        right: 0;
+        animation-delay: 2s;
+      }
+
+      @keyframes cyberScan {
+        0% {
+          opacity: 0;
+          transform: translateX(-100%);
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+      }
+
+      /* Responsive design */
+      @media (max-width: 480px) {
+        .container {
+          width: 90%;
+          padding: 30px;
+        }
+
+        .header h1 {
+          font-size: 28px;
+        }
+      }
+
+      /* Enhanced focus states */
+      .form-group input:focus + .focus-indicator {
+        opacity: 1;
+        transform: scaleX(1);
+      }
+
+      .focus-indicator {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        width: 100%;
+        background: linear-gradient(90deg, #00ff7f, #00cc66);
+        opacity: 0;
+        transform: scaleX(0);
+        transition: all 0.3s ease;
+        border-radius: 1px;
       }
     </style>
   </head>
   <body>
+    <div class="cyber-line"></div>
+    <div class="cyber-line"></div>
+
     <div class="container">
-      <button class="close-btn" onclick="closeUI()">&times;</button>
+      <button class="close-btn" onclick="closeUI()" title="Close">
+        &times;
+      </button>
 
       <div class="header">
-        <h1>Welcome to RAGE:MP</h1>
-        <p>Please login or create an account to continue</p>
+        <h1>BEAST RP</h1>
+        <p>ACCESS CONTROL SYSTEM</p>
       </div>
 
       <div id="message" class="message"></div>
-      <div id="loading" class="loading"></div>
+      <div id="loading" class="loading">PROCESSING</div>
 
       <div id="loginForm" class="form-container active">
         <form onsubmit="handleLogin(event)">
           <div class="form-group">
-            <label for="loginUsername">Username or Email</label>
+            <label for="loginUsername">USERNAME / EMAIL</label>
             <input
               type="text"
               id="loginUsername"
               name="username"
               required
               autocomplete="username"
+              placeholder="Enter your credentials"
             />
+            <div class="focus-indicator"></div>
           </div>
           <div class="form-group">
-            <label for="loginPassword">Password</label>
+            <label for="loginPassword">PASSWORD</label>
             <input
               type="password"
               id="loginPassword"
               name="password"
               required
               autocomplete="current-password"
+              placeholder="••••••••••••"
             />
+            <div class="focus-indicator"></div>
           </div>
-          <button type="submit" class="btn btn-primary">Login</button>
+          <button type="submit" class="btn btn-primary">AUTHENTICATE</button>
         </form>
         <div class="switch-mode">
-          <p>
-            Don't have an account? <a onclick="switchMode('signup')">Sign up</a>
-          </p>
+          <p>NEW TO THE SYSTEM?</p>
+          <a onclick="switchMode('signup')">CREATE ACCOUNT</a>
         </div>
       </div>
 
       <div id="signupForm" class="form-container">
         <form onsubmit="handleSignup(event)">
           <div class="form-group">
-            <label for="signupUsername">Username</label>
+            <label for="signupUsername">USERNAME</label>
             <input
               type="text"
               id="signupUsername"
@@ -263,20 +545,24 @@
               required
               minlength="3"
               autocomplete="username"
+              placeholder="Choose your handle"
             />
+            <div class="focus-indicator"></div>
           </div>
           <div class="form-group">
-            <label for="signupEmail">Email</label>
+            <label for="signupEmail">EMAIL ADDRESS</label>
             <input
               type="email"
               id="signupEmail"
               name="email"
               required
               autocomplete="email"
+              placeholder="your@email.com"
             />
+            <div class="focus-indicator"></div>
           </div>
           <div class="form-group">
-            <label for="signupPassword">Password</label>
+            <label for="signupPassword">PASSWORD</label>
             <input
               type="password"
               id="signupPassword"
@@ -284,10 +570,12 @@
               required
               minlength="6"
               autocomplete="new-password"
+              placeholder="Minimum 6 characters"
             />
+            <div class="focus-indicator"></div>
           </div>
           <div class="form-group">
-            <label for="signupConfirmPassword">Confirm Password</label>
+            <label for="signupConfirmPassword">CONFIRM PASSWORD</label>
             <input
               type="password"
               id="signupConfirmPassword"
@@ -295,14 +583,15 @@
               required
               minlength="6"
               autocomplete="new-password"
+              placeholder="Repeat your password"
             />
+            <div class="focus-indicator"></div>
           </div>
-          <button type="submit" class="btn btn-primary">Sign Up</button>
+          <button type="submit" class="btn btn-primary">REGISTER</button>
         </form>
         <div class="switch-mode">
-          <p>
-            Already have an account? <a onclick="switchMode('login')">Login</a>
-          </p>
+          <p>ALREADY REGISTERED?</p>
+          <a onclick="switchMode('login')">ACCESS ACCOUNT</a>
         </div>
       </div>
     </div>
@@ -343,7 +632,7 @@
         const password = formData.get("password");
 
         if (!username || !password) {
-          showMessage("error", "Please fill in all fields");
+          showMessage("error", "All fields are required for authentication");
           return;
         }
 
@@ -361,22 +650,22 @@
         const confirmPassword = formData.get("confirmPassword");
 
         if (!username || !email || !password || !confirmPassword) {
-          showMessage("error", "login.html Please fill in all fields");
+          showMessage("error", "All fields are required for registration");
           return;
         }
 
         if (password !== confirmPassword) {
-          showMessage("error", "Passwords do not match");
+          showMessage("error", "Password confirmation does not match");
           return;
         }
 
         if (password.length < 6) {
-          showMessage("error", "Password must be at least 6 characters");
+          showMessage("error", "Password must contain at least 6 characters");
           return;
         }
 
         if (username.length < 3) {
-          showMessage("error", "Username must be at least 3 characters");
+          showMessage("error", "Username requires minimum 3 characters");
           return;
         }
 
@@ -423,7 +712,7 @@
 
         setTimeout(() => {
           hideMessage();
-        }, 5000);
+        }, 6000);
       }
 
       function hideMessage() {
@@ -445,12 +734,37 @@
         if (event.key === "Escape") {
           closeUI();
         }
+
+        // Enter key navigation
+        if (event.key === "Enter" && event.target.tagName !== "BUTTON") {
+          const form = event.target.closest("form");
+          if (form) {
+            const inputs = Array.from(form.querySelectorAll("input"));
+            const currentIndex = inputs.indexOf(event.target);
+            const nextInput = inputs[currentIndex + 1];
+
+            if (nextInput) {
+              event.preventDefault();
+              nextInput.focus();
+            }
+          }
+        }
       });
 
       document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => {
           document.getElementById("loginUsername").focus();
-        }, 100);
+        }, 200);
+      });
+
+      document.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentElement.style.transform = "translateY(-2px)";
+        });
+
+        input.addEventListener("blur", function () {
+          this.parentElement.style.transform = "translateY(0)";
+        });
       });
     </script>
   </body>

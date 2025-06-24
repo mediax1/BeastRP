@@ -1,5 +1,4 @@
 module.exports = {
-  // Rental PED settings
   ped: {
     model: "a_m_m_business_01",
     location: { x: -600.23, y: 25.41, z: 43.0 },
@@ -9,7 +8,6 @@ module.exports = {
     invincible: true,
   },
 
-  // Text label settings
   textLabel: {
     text: "Press ~y~E~w~ to get rental vehicle",
     offset: 1.5,
@@ -19,14 +17,12 @@ module.exports = {
     color: [255, 255, 255, 255],
   },
 
-  // Interaction settings
   interaction: {
     maxDistance: 5.0,
   },
 
-  // Timer settings
   timer: {
-    duration: 200, // seconds
-    interval: 1000, // milliseconds
+    duration: 200,
+    interval: 1000,
   },
 };

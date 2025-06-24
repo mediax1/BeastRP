@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garbage Job Confirmation</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        }
+        
+        body {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            overflow: hidden;
+        }
+        
+        /* Container styles */
+        .container {
+            width: 400px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            color: white;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        /* Header styles */
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #1B5E20;
+        }
+        
+        /* Content styles */
+        .content {
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .content p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        /* Button styles */
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 45%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-cancel {
+            background-color: #F44336;
+            color: white;
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Close animation */
+        .fade-out {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="confirmation-dialog">
+        <div class="header">Start Garbage Job?</div>
+        <div class="content">
+            <p>You are about to start working as a garbage collector. You will be assigned a garbage truck and need to collect garbage bags around the city.</p>
+            <p>Pay: $100 per garbage bag collected</p>
+        </div>
+        <div class="buttons">
+            <button class="btn btn-confirm" id="confirm-btn">Confirm</button>
+            <button class="btn btn-cancel" id="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const confirmationDialog = document.getElementById('confirmation-dialog');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        
+        // Handle confirm button click
+        confirmBtn.addEventListener('click', () => {
+            // Add fade-out animation
+            confirmationDialog.classList.add('fade-out');
+            
+            // Wait for animation to complete before calling event
+            setTimeout(() => {
+                // Call the RAGE:MP event to confirm job start
+                mp.trigger('garbageJob:confirmStart');
+            }, 300);
+        });
+        
+        // Handle cancel button click
+        cancelBtn.addEventListener('click', () => {
+            // Add fade-out animation
+            confirmationDialog.classList.add('fade-out');
+            
+            // Wait for animation to complete before calling event
+            setTimeout(() => {
+                // Call the RAGE:MP event to cancel job start
+                mp.trigger('garbageJob:cancelStart');
+            }, 300);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quit Garbage Job Confirmation</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        }
+        
+        body {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            overflow: hidden;
+        }
+        
+        /* Container styles */
+        .container {
+            width: 400px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            color: white;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        /* Header styles */
+        .header {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #E65100;
+        }
+        
+        /* Content styles */
+        .content {
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .content p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        /* Stats styles */
+        .stats {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #FFC107;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+        }
+        
+        /* Button styles */
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 45%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-cancel {
+            background-color: #F44336;
+            color: white;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Quit Garbage Job?</div>
+        <div class="content">
+            <p>Are you sure you want to end your garbage collection job?</p>
+            
+            <div class="stats">
+                <div class="stat-row">
+                    <span class="stat-label">Bags Collected:</span>
+                    <span id="bags-collected" class="stat-value">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Payout:</span>
+                    <span id="total-payment" class="stat-value">$0</span>
+                </div>
+            </div>
+            
+            <p>Confirm to receive payment and end the job.</p>
+        </div>
+        <div class="buttons">
+            <button class="btn btn-cancel" onclick="cancelQuit()">Cancel</button>
+            <button class="btn btn-confirm" onclick="confirmQuit()">Confirm</button>
+        </div>
+    </div>
+    
+    <script>
+        // Function to handle confirmation
+        function confirmQuit() {
+            // Call the client-side event to confirm quitting
+            mp.trigger('garbageJob:confirmQuit');
+        }
+        
+        // Function to handle cancellation
+        function cancelQuit() {
+            // Call the client-side event to cancel quitting
+            mp.trigger('garbageJob:cancelQuit');
+        }
+    </script>
+</body>
+</html>

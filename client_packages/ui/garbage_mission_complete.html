@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Complete - Garbage Job</title>
+    <style>
+        @font-face {
+            font-family: 'Pricedown';
+            src: url('https://dl.dafont.com/dl/?f=pricedown');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+
+        .mission-complete-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .header {
+            font-family: 'Pricedown', 'Arial', sans-serif;
+            font-size: 8vw;
+            color: #ffde29;
+            text-shadow: 0 0 10px #ff9800, 0 0 20px #ff9800;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            animation: pulseHeader 2s infinite;
+            text-align: center;
+        }
+
+        .subheader {
+            font-size: 3vw;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .trophy-icon {
+            font-size: 3.5vw;
+            color: gold;
+            margin-left: 15px;
+            animation: pulseTrophy 1.5s infinite;
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ffde29;
+            border-radius: 10px;
+            padding: 30px;
+            width: 50%;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1.5vw;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #ffde29;
+        }
+
+        .stat-value {
+            font-weight: bold;
+        }
+
+        .continue-btn {
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.8vw;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px #4CAF50;
+            animation: glowButton 2s infinite;
+        }
+
+        .continue-btn:hover {
+            background: linear-gradient(to bottom, #5CDF60, #3E8D42);
+            transform: scale(1.05);
+        }
+
+        .continue-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes pulseHeader {
+            0% { text-shadow: 0 0 10px #ff9800, 0 0 20px #ff9800; }
+            50% { text-shadow: 0 0 20px #ff9800, 0 0 30px #ff9800, 0 0 40px #ff9800; }
+            100% { text-shadow: 0 0 10px #ff9800, 0 0 20px #ff9800; }
+        }
+
+        @keyframes pulseTrophy {
+            0% { transform: scale(1); text-shadow: 0 0 5px gold; }
+            50% { transform: scale(1.2); text-shadow: 0 0 20px gold, 0 0 30px gold; }
+            100% { transform: scale(1); text-shadow: 0 0 5px gold; }
+        }
+
+        @keyframes glowButton {
+            0% { box-shadow: 0 0 10px #4CAF50; }
+            50% { box-shadow: 0 0 20px #4CAF50, 0 0 30px #4CAF50; }
+            100% { box-shadow: 0 0 10px #4CAF50; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header { font-size: 12vw; }
+            .subheader { font-size: 5vw; }
+            .trophy-icon { font-size: 5.5vw; }
+            .stats-panel { width: 80%; }
+            .stat-row { font-size: 3vw; }
+            .continue-btn { font-size: 3vw; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mission-complete-container" id="mission-container">
+        <div class="header">Mission Complete</div>
+        <div class="subheader">
+            Garbage Job
+            <span class="trophy-icon">🏆</span>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stat-row">
+                <span class="stat-label">Bags Collected:</span>
+                <span class="stat-value" id="bags-collected">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Payout:</span>
+                <span class="stat-value" id="payout">$0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Duration:</span>
+                <span class="stat-value" id="duration">0 seconds</span>
+            </div>
+        </div>
+        
+        <button class="continue-btn" id="continue-btn">Continue</button>
+    </div>
+
+    <!-- Audio element removed - sound is now played by a separate browser -->
+
+    <script>
+        // Get DOM elements
+        const missionContainer = document.getElementById('mission-container');
+        const bagsCollectedElement = document.getElementById('bags-collected');
+        const payoutElement = document.getElementById('payout');
+        const durationElement = document.getElementById('duration');
+        const continueBtn = document.getElementById('continue-btn');
+
+        // Function to receive data from the game
+        function updateStats(bagsCollected, payout, duration) {
+            bagsCollectedElement.textContent = bagsCollected;
+            payoutElement.textContent = `$${payout}`;
+            durationElement.textContent = `${duration} seconds`;
+        }
+
+        // Sound is now played by a separate browser
+
+        // Continue button click handler
+        continueBtn.addEventListener('click', () => {
+            // Add fade out animation
+            missionContainer.style.animation = 'fadeOut 0.5s ease-in-out forwards';
+            
+            // Notify the game that the player clicked continue
+            setTimeout(() => {
+                try {
+                    mp.trigger('garbageJob:missionCompleteConfirmed');
+                } catch (e) {
+                    console.log('Not in RAGE MP environment');
+                }
+            }, 500); // Match the duration of the fadeOut animation
+        });
+
+        // For testing outside of RAGE MP
+        if (typeof mp === 'undefined') {
+            updateStats(8, 800, 325);
+        }
+    </script>
+</body>
+</html>
