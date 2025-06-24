@@ -10,6 +10,13 @@ class AuthManager {
   init() {
     this.setupEventHandlers();
     CharacterManager.init();
+
+    // Perform session cleanup on server startup
+    this.performStartupCleanup();
+
+    // Set up periodic session cleanup (every 30 minutes)
+    this.setupPeriodicCleanup();
+
     console.log("AuthManager initialized");
   }
 
@@ -33,6 +40,22 @@ class AuthManager {
 
   onPlayerQuit(player) {
     console.log(`Player ${player.name} left the server`);
+
+    // Get the session token and invalidate it in the database
+    const sessionToken = player.getVariable("sessionToken");
+    if (sessionToken) {
+      this.invalidateSession(sessionToken)
+        .then(() => {
+          console.log(`Session invalidated for player ${player.name}`);
+        })
+        .catch((error) => {
+          console.error(
+            `Error invalidating session for player ${player.name}:`,
+            error
+          );
+        });
+    }
+
     this.activeSessions.delete(player.id);
   }
 
@@ -426,6 +449,24 @@ class AuthManager {
     return this.activeSessions.size;
   }
 
+  async getSessionStats() {
+    try {
+      const DatabaseManager = require("./DatabaseManager.js");
+      const stats = await DatabaseManager.getStats();
+
+      return {
+        ...stats,
+        activeInMemory: this.activeSessions.size,
+        totalActive: stats.activeSessions,
+        totalSessions:
+          stats.activeSessions + (stats.totalSessions - stats.activeSessions),
+      };
+    } catch (error) {
+      console.error("Error getting session stats:", error);
+      return null;
+    }
+  }
+
   validateUsername(username) {
     const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
     return usernameRegex.test(username);
@@ -438,6 +479,37 @@ class AuthManager {
 
   validatePassword(password) {
     return password.length >= 6;
+  }
+
+  async performStartupCleanup() {
+    try {
+      console.log("Performing startup session cleanup...");
+      const cleanedCount = await DatabaseManager.performFullSessionCleanup();
+      console.log(
+        `Startup cleanup completed: ${cleanedCount} sessions removed`
+      );
+    } catch (error) {
+      console.error("Error during startup cleanup:", error);
+    }
+  }
+
+  setupPeriodicCleanup() {
+    // Clean up sessions every 30 minutes
+    setInterval(async () => {
+      try {
+        const DatabaseManager = require("./DatabaseManager.js");
+        const cleanedCount = await DatabaseManager.cleanupExpiredSessions();
+        if (cleanedCount > 0) {
+          console.log(
+            `Periodic cleanup: ${cleanedCount} expired sessions removed`
+          );
+        }
+      } catch (error) {
+        console.error("Error during periodic cleanup:", error);
+      }
+    }, 30 * 60 * 1000); // 30 minutes
+
+    console.log("Periodic session cleanup scheduled (every 30 minutes)");
   }
 }
 

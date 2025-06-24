@@ -297,6 +297,72 @@ class DatabaseManager {
       return null;
     }
   }
+
+  async cleanupExpiredSessions() {
+    try {
+      const sessions = this.readJSONFile(this.sessionsFile);
+      const now = new Date();
+      const originalCount = sessions.length;
+
+      // Filter out expired sessions
+      const validSessions = sessions.filter((session) => {
+        const expiresAt = new Date(session.expiresAt);
+        return expiresAt > now && session.isActive;
+      });
+
+      const removedCount = originalCount - validSessions.length;
+
+      if (removedCount > 0) {
+        this.writeJSONFile(this.sessionsFile, validSessions);
+        console.log(`Cleaned up ${removedCount} expired sessions`);
+      }
+
+      return removedCount;
+    } catch (error) {
+      console.error("Error cleaning up expired sessions:", error);
+      return 0;
+    }
+  }
+
+  async cleanupInactiveSessions() {
+    try {
+      const sessions = this.readJSONFile(this.sessionsFile);
+      const originalCount = sessions.length;
+
+      // Filter out inactive sessions
+      const activeSessions = sessions.filter((session) => session.isActive);
+
+      const removedCount = originalCount - activeSessions.length;
+
+      if (removedCount > 0) {
+        this.writeJSONFile(this.sessionsFile, activeSessions);
+        console.log(`Cleaned up ${removedCount} inactive sessions`);
+      }
+
+      return removedCount;
+    } catch (error) {
+      console.error("Error cleaning up inactive sessions:", error);
+      return 0;
+    }
+  }
+
+  async performFullSessionCleanup() {
+    try {
+      console.log("Starting full session cleanup...");
+
+      const expiredCount = await this.cleanupExpiredSessions();
+      const inactiveCount = await this.cleanupInactiveSessions();
+
+      console.log(
+        `Session cleanup completed: ${expiredCount} expired, ${inactiveCount} inactive sessions removed`
+      );
+
+      return expiredCount + inactiveCount;
+    } catch (error) {
+      console.error("Error during full session cleanup:", error);
+      return 0;
+    }
+  }
 }
 
 module.exports = new DatabaseManager();

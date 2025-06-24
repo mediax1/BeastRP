@@ -10,6 +10,14 @@ class CommandsManager {
     mp.events.addCommand("help", (player) => {
       this.showHelp(player);
     });
+
+    mp.events.addCommand("cleansessions", (player) => {
+      this.cleanupSessions(player);
+    });
+
+    mp.events.addCommand("sessionstats", (player) => {
+      this.showSessionStats(player);
+    });
   }
 
   setupEvents() {
@@ -43,10 +51,72 @@ class CommandsManager {
     player.outputChatBox(
       `!{cyan}Re-enter vehicle!{white} - Stops timer and resumes rental`
     );
+    player.outputChatBox(`!{yellow}[ADMIN COMMANDS]!{white}`);
+    player.outputChatBox(
+      `!{cyan}/cleansessions!{white} - Clean up expired sessions`
+    );
+    player.outputChatBox(
+      `!{cyan}/sessionstats!{white} - Show session statistics`
+    );
+  }
+
+  async cleanupSessions(player) {
+    try {
+      const AuthManager = require("../../auth/systems/AuthManager.js");
+      const DatabaseManager = require("../../auth/systems/DatabaseManager.js");
+
+      player.outputChatBox(
+        `!{yellow}[SESSION CLEANUP]!{white} Starting cleanup...`
+      );
+
+      const cleanedCount = await DatabaseManager.performFullSessionCleanup();
+
+      player.outputChatBox(
+        `!{green}[SESSION CLEANUP]!{white} Completed! Removed ${cleanedCount} sessions.`
+      );
+      console.log(
+        `Admin ${player.name} triggered session cleanup: ${cleanedCount} sessions removed`
+      );
+    } catch (error) {
+      console.error("Error during admin session cleanup:", error);
+      player.outputChatBox(
+        `!{red}[SESSION CLEANUP]!{white} Error occurred during cleanup.`
+      );
+    }
+  }
+
+  async showSessionStats(player) {
+    try {
+      const AuthManager = require("../../auth/systems/AuthManager.js");
+
+      const stats = await AuthManager.getSessionStats();
+
+      if (stats) {
+        player.outputChatBox(`!{yellow}[SESSION STATS]!{white}`);
+        player.outputChatBox(
+          `!{cyan}Active in memory:!{white} ${stats.activeInMemory}`
+        );
+        player.outputChatBox(
+          `!{cyan}Active in database:!{white} ${stats.activeSessions}`
+        );
+        player.outputChatBox(
+          `!{cyan}Total sessions:!{white} ${stats.totalSessions}`
+        );
+        player.outputChatBox(`!{cyan}Total users:!{white} ${stats.totalUsers}`);
+      } else {
+        player.outputChatBox(
+          `!{red}[SESSION STATS]!{white} Unable to retrieve statistics.`
+        );
+      }
+    } catch (error) {
+      console.error("Error getting session stats:", error);
+      player.outputChatBox(
+        `!{red}[SESSION STATS]!{white} Error occurred while getting statistics.`
+      );
+    }
   }
 }
 
-// Create singleton instance
 const commandsManager = new CommandsManager();
 
 module.exports = commandsManager;

@@ -19,6 +19,8 @@ const GARBAGE_BAG_COUNT = 150;
 const GARBAGE_BAG_EXCLUSION_RADIUS = 25.0;
 const GARBAGE_BAG_REWARD = 100;
 
+const characterManager = require("../auth/systems/CharacterManager.js");
+
 function initialize() {
   global.garbageNPC = mp.peds.new(
     mp.joaat(GARBAGE_NPC_MODEL),
@@ -159,9 +161,82 @@ function endGarbageJob(player, completed = false) {
   const seconds = ((jobDuration % 60000) / 1000).toFixed(0);
   const formattedDuration = `${minutes}m ${seconds}s`;
 
+  // Money economy integration
   if (completed && totalPayment > 0) {
-    const currentMoney = player.getVariable("money") || 0;
-    player.setVariable("money", currentMoney + totalPayment);
+    const characterId = player.getVariable("characterId");
+    if (characterId) {
+      // Get current character data
+      const characters = characterManager.readJSONFile(
+        characterManager.charactersFile
+      );
+      const characterIndex = characters.findIndex((c) => c.id === characterId);
+
+      if (characterIndex !== -1) {
+        const character = characters[characterIndex];
+        const currentBank = character.bank || 0;
+        const newBankBalance = currentBank + totalPayment;
+
+        character.bank = newBankBalance;
+        character.lastPlayed = new Date().toISOString();
+
+        character.position = {
+          x: player.position.x,
+          y: player.position.y,
+          z: player.position.z,
+        };
+
+        characterManager.writeJSONFile(
+          characterManager.charactersFile,
+          characters
+        );
+
+        player.setVariable("bank", newBankBalance);
+
+        player.call("hud:updateMoney", [character.money || 0, newBankBalance]);
+
+        console.log(
+          `[SERVER] Player ${player.name} earned $${totalPayment} from garbage job. New bank balance: $${newBankBalance}`
+        );
+      }
+    }
+  } else if (!completed && bagsCollected > 0) {
+    const partialPayment = bagsCollected * GARBAGE_BAG_REWARD;
+    const characterId = player.getVariable("characterId");
+    if (characterId) {
+      const characters = characterManager.readJSONFile(
+        characterManager.charactersFile
+      );
+      const characterIndex = characters.findIndex((c) => c.id === characterId);
+
+      if (characterIndex !== -1) {
+        const character = characters[characterIndex];
+        const currentBank = character.bank || 0;
+        const newBankBalance = currentBank + partialPayment;
+
+        character.bank = newBankBalance;
+        character.lastPlayed = new Date().toISOString();
+
+        // Save current position
+        character.position = {
+          x: player.position.x,
+          y: player.position.y,
+          z: player.position.z,
+        };
+
+        characterManager.writeJSONFile(
+          characterManager.charactersFile,
+          characters
+        );
+
+        player.setVariable("bank", newBankBalance);
+
+        player.call("hud:updateMoney", [character.money || 0, newBankBalance]);
+
+        console.log(
+          `[SERVER] Player ${player.name} earned partial payment $${partialPayment} from garbage job. New bank balance: $${newBankBalance}`
+        );
+      }
+    }
   }
 
   if (player.garbageTruck) {
@@ -181,10 +256,21 @@ function endGarbageJob(player, completed = false) {
     player.outputChatBox(
       `You collected ${bagsCollected} bags in ${formattedDuration}.`
     );
+    player.outputChatBox(`Money has been deposited to your bank account.`);
   } else {
-    player.outputChatBox(
-      `Garbage job ended. You collected ${bagsCollected} bags.`
-    );
+    if (bagsCollected > 0) {
+      const partialPayment = bagsCollected * GARBAGE_BAG_REWARD;
+      player.outputChatBox(
+        `Garbage job ended. You collected ${bagsCollected} bags and earned $${partialPayment}.`
+      );
+      player.outputChatBox(
+        `Partial payment has been deposited to your bank account.`
+      );
+    } else {
+      player.outputChatBox(
+        `Garbage job ended. You collected ${bagsCollected} bags.`
+      );
+    }
   }
 
   player.call("garbageJob:ended", [completed, bagsCollected, totalPayment]);

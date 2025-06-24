@@ -2,7 +2,7 @@ class HUDManager {
   constructor() {
     this.browser = null;
     this.visible = false;
-    this.serverName = "RAGE:MP Auth Server";
+    this.serverName = "Beast RP";
     this.playerId = null;
     this.wallet = 0;
     this.bank = 0;
@@ -24,6 +24,8 @@ class HUDManager {
     mp.events.add("hud:setServerName", this.setServerName.bind(this));
     mp.events.add("hud:setPlayerId", this.setPlayerId.bind(this));
     mp.events.add("hud:setMoney", this.setMoney.bind(this));
+
+    mp.events.add("hud:updateMoney", this.updateMoney.bind(this));
   }
 
   show() {
@@ -62,6 +64,17 @@ class HUDManager {
     this.browser.execute(
       `window.postMessage({type: 'setMoney', wallet: '${wallet}', bank: '${bank}'}, '*');`
     );
+  }
+
+  updateMoney(wallet, bank) {
+    this.wallet = wallet;
+    this.bank = bank;
+    this.browser.execute(
+      `window.postMessage({type: 'setMoney', wallet: '${wallet}', bank: '${bank}'}, '*');`
+    );
+
+    mp.players.local.setVariable("money", wallet);
+    mp.players.local.setVariable("bank", bank);
   }
 
   isVisible() {
