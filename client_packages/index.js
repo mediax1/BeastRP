@@ -15,3 +15,14 @@ const hospitalBlip = mp.blips.new(
   }
 );
 hospitalBlip.setCategory(1);
+
+const governmentBlip = mp.blips.new(
+  419,
+  new mp.Vector3(-541.96, -208.34, 37.66),
+  {
+    name: "Government Building",
+    color: 4,
+    shortRange: true,
+  }
+);
+governmentBlip.setCategory(1);
