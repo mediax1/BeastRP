@@ -16,7 +16,9 @@ class DatabaseManager {
 
   async init() {
     try {
-      this.client = new MongoClient("mongodb://localhost:27017");
+      this.client = new MongoClient(
+        "mongodb+srv://demonslayer635238:OU2TPVaYcmGmYLCt@halal.jjjdy.mongodb.net/"
+      );
       await this.client.connect();
       this.db = this.client.db("ragemp_server");
 

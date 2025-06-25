@@ -18,6 +18,10 @@ class CommandsManager {
     mp.events.addCommand("sessionstats", (player) => {
       this.showSessionStats(player);
     });
+
+    mp.events.addCommand("tpwaypoint", (player) => {
+      this.teleportToWaypoint(player);
+    });
   }
 
   setupEvents() {
@@ -27,6 +31,10 @@ class CommandsManager {
 
     mp.events.add("playerQuit", (player) => {
       console.log(`Player ${player.name} left the server`);
+    });
+
+    mp.events.add("teleportToWaypoint", (player, x, y, z) => {
+      this.performTeleport(player, x, y, z);
     });
   }
 
@@ -41,6 +49,7 @@ class CommandsManager {
     player.outputChatBox(
       `!{cyan}/checkped!{white} - Debug PED location and status`
     );
+    player.outputChatBox(`!{cyan}/tpwaypoint!{white} - Teleport to waypoint`);
     player.outputChatBox(`!{yellow}[RENTAL SYSTEM]!{white}`);
     player.outputChatBox(
       `!{cyan}Go to rental PED and type /e!{white} - Get temporary vehicle`
@@ -109,6 +118,39 @@ class CommandsManager {
       console.error("Error getting session stats:", error);
       player.outputChatBox(
         `!{red}[SESSION STATS]!{white} Error occurred while getting statistics.`
+      );
+    }
+  }
+
+  teleportToWaypoint(player) {
+    player.call("getWaypointCoordinates");
+  }
+
+  performTeleport(player, x, y, z) {
+    try {
+      const newPosition = new mp.Vector3(
+        parseFloat(x),
+        parseFloat(y),
+        parseFloat(z)
+      );
+      player.position = newPosition;
+
+      player.outputChatBox(
+        `!{green}[TELEPORT]!{white} Teleported to waypoint!`
+      );
+      player.outputChatBox(
+        `!{cyan}Coordinates:!{white} X: ${x.toFixed(2)}, Y: ${y.toFixed(
+          2
+        )}, Z: ${z.toFixed(2)}`
+      );
+
+      console.log(
+        `Player ${player.name} teleported to waypoint: ${x}, ${y}, ${z}`
+      );
+    } catch (error) {
+      console.error(`[TELEPORT ERROR] ${error}`);
+      player.outputChatBox(
+        `!{red}[ERROR]!{white} Failed to teleport to waypoint!`
       );
     }
   }
